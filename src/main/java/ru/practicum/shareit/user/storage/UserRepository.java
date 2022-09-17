@@ -1,16 +1,16 @@
 package ru.practicum.shareit.user.storage;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
-@Component
+@Repository
 public class UserRepository {
     private Long id = 0L;
-    private HashMap<Long, User> storage = new HashMap<>();
+    private Set emails = new HashSet<String>();
+    private Map<Long, User> storage = new HashMap<>();
 
     public User add(User user) {
         user.setId(++id);
@@ -18,21 +18,26 @@ public class UserRepository {
         return storage.get(user.getId());
     }
 
-    public User update(User user) {
-        storage.put(user.getId(), user);
-        return storage.get(user.getId());
-    }
 
     public void delete(Long userId) {
         storage.remove(userId);
     }
 
-    public User getUser(Long id) {
-        if (!storage.containsKey(id)) {
-            throw new NotFoundException("Пользователя с указанным ID НЕТ!");
-        }
+    public User getUserById(Long id) {
 
-        return storage.get(id);
+        return Optional.ofNullable(storage.get(id)).orElseThrow(() ->
+                new NotFoundException("Пользователя с указанным ID НЕТ!"));
+
+    }
+
+    public void addEmail(String email) {
+        if (!emails.add(email)) {
+            throw new RuntimeException("Пользователь с таким Email уже существует");
+        }
+    }
+
+    public void delEmail(String email) {
+        emails.remove(email);
     }
 
     public Collection<User> getUsers() {

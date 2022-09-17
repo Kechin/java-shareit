@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,47 +11,41 @@ import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private Set emails = new HashSet<>();
+
     @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDto create(UserDto userDto) {
-        emailCheck(userDto.getEmail());
+        userRepository.addEmail(userDto.getEmail());
         User user = userRepository.add(UserMapper.toUser(userDto));
-        emails.add(user.getEmail());
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto update(UserDto userDto, Long id) {
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
-        User oldUser = userRepository.getUser(id);
+        User oldUser = userRepository.getUserById(id);
         if (userDto.getEmail() != null) {
-            emailCheck(userDto.getEmail());
-            emails.add(userDto.getEmail());
-            emails.remove(oldUser.getEmail());
-        } else {
-            userDto.setEmail(oldUser.getEmail());
+            userRepository.addEmail(userDto.getEmail());
+            userRepository.delEmail(oldUser.getEmail());
+            oldUser.setEmail(userDto.getEmail());
         }
-
-        if (userDto.getName() == null) {
-            userDto.setName(oldUser.getName());
+        if (userDto.getName() != null) {
+            oldUser.setName(userDto.getName());
         }
-        userDto.setId(id);
-        return UserMapper.toUserDto(userRepository.update(UserMapper.toUser(userDto)));
+        return UserMapper.toUserDto(oldUser);
     }
 
     @Override
     public UserDto get(Long userId) {
-        return UserMapper.toUserDto(userRepository.getUser(userId));
+        return UserMapper.toUserDto(userRepository.getUserById(userId));
     }
 
     @Override
@@ -64,14 +59,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long userId) {
-        emails.remove(userRepository.getUser(userId).getEmail());
-        userRepository.delete(userId);
-    }
+        log.info("Запрос на удаления пользователя " + userId);
 
-    private void emailCheck(String email) {
-        if (emails.contains(email)) {
-            throw new RuntimeException("Пользователь с таким Email уже существует");
-        }
-        ;
+        userRepository.delEmail(userRepository.getUserById(userId).getEmail());
+        userRepository.delete(userId);
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,43 +13,42 @@ import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     @Autowired
-    ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
     @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ItemDto create(ItemDto itemDto, Long userId) {
         log.info("Запрос на добавление " + userId + " " + itemDto);
-        Item newItem = ItemMapper.toItem(itemDto, userRepository.getUser(userId));
+        Item newItem = ItemMapper.toItem(itemDto, userRepository.getUserById(userId));
         return ItemMapper.toItemDto(itemRepository.add(newItem));
     }
 
     @Override
     public ItemDto update(Long id, ItemDto itemDto, Long userId) {
         log.info("Запрос на обновление " + userId + " " + itemDto);
-
-        Item updatetItem = ItemMapper.toItem(itemDto, userRepository.getUser(userId));
         Item oldItem = itemRepository.getById(id);
         if (!userId.equals(oldItem.getOwner().getId())) {
             throw new NotFoundException("ID пользователя не соотвествует Владельцу");
         }
-        updatetItem.setId(id);
-        if (updatetItem.getName() == null) {
-            updatetItem.setName(oldItem.getName());
+        if (itemDto.getName() != null) {
+            oldItem.setName(itemDto.getName());
         }
-        if (updatetItem.getDescription() == null) {
-            updatetItem.setDescription(oldItem.getDescription());
+        if (itemDto.getDescription() != null) {
+            oldItem.setDescription(itemDto.getDescription());
         }
-        if (updatetItem.getAvailable() == null) {
-            updatetItem.setAvailable(oldItem.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            oldItem.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemRepository.update(updatetItem));
+        return ItemMapper.toItemDto(oldItem);
     }
 
     @Override
@@ -69,10 +69,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getByText(String text) {
 
-        List<ItemDto> itemDtos = new ArrayList<>();
-        if (text.equals("")) {
-            return itemDtos;
+        if (text.isBlank()) {
+            return Collections.emptyList();
         }
+        List<ItemDto> itemDtos = new ArrayList<>();
         List<Item> items = itemRepository.getByDescription(text.toLowerCase());
 
         for (Item item : items) {
