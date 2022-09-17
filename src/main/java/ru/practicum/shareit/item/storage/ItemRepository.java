@@ -35,7 +35,7 @@ public class ItemRepository {
     public List<Item> getByUser(Long id) {
         return storage.values()
                 .stream()
-                .filter(i -> i.getOwner().getId() == id)
+                .filter(i -> i.getOwner().getId().equals(id))
                 .collect(Collectors.toList());
     }
 
