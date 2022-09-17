@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
         Item updatetItem = ItemMapper.toItem(itemDto, userRepository.getUser(userId));
         Item oldItem = itemRepository.getById(id);
-        if (userId != oldItem.getOwner().getId()) {
+        if (!userId.equals( oldItem.getOwner())) {
             throw new NotFoundException("ID пользователя не соотвествует Владельцу");
         }
         updatetItem.setId(id);
@@ -70,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getByText(String text) {
 
         List<ItemDto> itemDtos = new ArrayList<>();
-        if (text == "") {
+        if (text.equals( "")) {
             return itemDtos;
         }
         List<Item> items = itemRepository.getByDescription(text.toLowerCase());
