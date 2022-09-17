@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
         Item updatetItem = ItemMapper.toItem(itemDto, userRepository.getUser(userId));
         Item oldItem = itemRepository.getById(id);
-        if (!userId.equals( oldItem.getOwner())) {
+        if (!userId.equals( oldItem.getOwner().getId())) {
             throw new NotFoundException("ID пользователя не соотвествует Владельцу");
         }
         updatetItem.setId(id);
