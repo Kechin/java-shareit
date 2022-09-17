@@ -12,7 +12,7 @@ import ru.practicum.shareit.user.model.User;
 @AllArgsConstructor
 @ToString
 public class Item {
-    private Long Id;
+    private Long id;
     private String name;
     private String description;
     private Boolean available;
