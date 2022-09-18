@@ -8,13 +8,13 @@ import java.util.*;
 @Repository
 public class UserRepository {
     private Long id = 0L;
-    private Set emails = new HashSet<String>();
+    private Set<String> emails = new HashSet<>();
     private Map<Long, User> storage = new HashMap<>();
 
     public User add(User user) {
         user.setId(++id);
         storage.put(user.getId(), user);
-        return storage.get(user.getId());
+        return user;
     }
 
 
