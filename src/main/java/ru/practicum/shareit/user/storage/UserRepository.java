@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -23,24 +22,21 @@ public class UserRepository {
         storage.remove(userId);
     }
 
-    public User getUserById(Long id) {
-
-        return Optional.ofNullable(storage.get(id)).orElseThrow(() ->
-                new NotFoundException("Пользователя с указанным ID НЕТ!"));
+    public Optional<User> getUserById(Long id) {
+        System.out.println("запрос на пользовател");
+        return Optional.ofNullable(storage.get(id));
 
     }
 
-    public void addEmail(String email) {
-        if (!emails.add(email)) {
-            throw new RuntimeException("Пользователь с таким Email уже существует");
-        }
+    public boolean addEmail(String email) {
+        return emails.add(email);
     }
 
     public void delEmail(String email) {
         emails.remove(email);
     }
 
-    public Collection<User> getUsers() {
-        return storage.values();
+    public List<User> getUsers() {
+        return List.copyOf(storage.values());
     }
 }
