@@ -97,32 +97,31 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
-        List<BookingDto> bookings = BookingMapper
-                .bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
+        var n = LocalDateTime.now();
+
         switch (BookingReqState.valueOf(state)) {
             case ALL:
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndEndIsBeforeOrderByEndDesc(bookerId, LocalDateTime.now()));
+                        .findBookingsByBookerIdAndEndIsBeforeOrderByEndDesc(bookerId, n));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsAfterOrderByEndDesc(bookerId, LocalDateTime.now()));
+                        .findBookingsByBookerIdAndStartIsAfterOrderByEndDesc(bookerId, n));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc
-                                (bookerId, LocalDateTime.now(), LocalDateTime.now()));
+                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(bookerId, n, n));
             case WAITING:
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdAndStatusEqualsOrderByEndDesc
-                        (bookerId, Status.WAITING));
+                return BookingMapper.bookingDtos(bookingRepository
+                        .findBookingsByBookerIdAndStatusEqualsOrderByEndDesc(bookerId, Status.WAITING));
 
             case REJECTED:
                 log.info("Rejected");
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdAndStatusEqualsOrderByEndDesc
-                        (bookerId, Status.REJECTED));
+                return BookingMapper.bookingDtos(bookingRepository
+                        .findBookingsByBookerIdAndStatusEqualsOrderByEndDesc(bookerId, Status.REJECTED));
             default:
                 throw new ValidationException("");
         }
@@ -138,23 +137,23 @@ public class BookingServiceImpl implements BookingService {
         } catch (IllegalArgumentException e) {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
+        var n = LocalDateTime.now();
         switch (BookingReqState.valueOf(state)) {
             case ALL:
-                List<BookingDto> bookings = BookingMapper.bookingDtos(bookingRepository
+                return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdOrderByStartDesc(ownerId));
-                return bookings;
+
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndEndIsBeforeOrderByEndDesc(ownerId, LocalDateTime.now()));
+                        .findBookingsByItem_Owner_IdAndEndIsBeforeOrderByEndDesc(ownerId, n));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsAfterOrderByEndDesc(ownerId, LocalDateTime.now()));
+                        .findBookingsByItem_Owner_IdAndStartIsAfterOrderByEndDesc(ownerId, n));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByEndDesc
-                                (ownerId, LocalDateTime.now(), LocalDateTime.now()));
+                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(ownerId, n, n));
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStatusEqualsOrderByEndDesc(ownerId, Status.WAITING));

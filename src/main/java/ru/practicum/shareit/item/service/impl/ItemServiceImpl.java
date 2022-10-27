@@ -106,9 +106,10 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
+
         return itemRepository
-                .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue //lol
-                        (text, text).stream().map(ItemMapper::toItemDto)
+                .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue(text, text)
+                .stream().map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -147,4 +148,5 @@ public class ItemServiceImpl implements ItemService {
         return ((itemRepository.findById(id)).orElseThrow(() ->
                 new NotFoundException("Item c данным Id не найден")));
     }
+
 }
