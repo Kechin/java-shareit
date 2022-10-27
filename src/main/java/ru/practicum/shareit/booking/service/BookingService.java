@@ -9,7 +9,7 @@ import java.util.List;
 public interface BookingService {
 
 
-    BookingDto create(BookingRequestDto bookingDto, Long ownerId) ;
+    BookingDto create(BookingRequestDto bookingDto, Long ownerId);
 
     BookingDto update(Long id, Long userId, Boolean approve);
 
@@ -18,7 +18,7 @@ public interface BookingService {
 
     List<BookingDto> getByText(String text);
 
-    Booking getById(Long id,Long userId);
+    Booking getById(Long id, Long userId);
 
     List<BookingDto> getAllByOwner(Long userId, String state);
 }

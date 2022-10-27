@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.model.UserMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Component
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -22,12 +23,14 @@ public class ItemMapper {
 
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
-                UserMapper.toUserDto(item.getOwner()),null);
+                UserMapper.toUserDto(item.getOwner()), null);
     }
-    public  static ItemDtoWithBooking itemDtoWithBooking(Item item){
+
+    public static ItemDtoWithBooking itemDtoWithBooking(Item item) {
         return new ItemDtoWithBooking(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
                 null, null, new ArrayList<>());
     }
+
     public static List<ItemDtoWithBooking> itemDtoWithBookings(List<Item> items) {
         return items.stream().map(ItemMapper::itemDtoWithBooking).collect(Collectors.toList());
     }

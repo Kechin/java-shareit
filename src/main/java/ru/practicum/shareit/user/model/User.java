@@ -27,7 +27,7 @@ public class User {
     @NotNull(groups = Create.class)
     private String name;
     @Column(name = "email", unique = true)
-    @Email(groups = {Create.class, Update.class},message = "Неверный e-mail")
+    @Email(groups = {Create.class, Update.class}, message = "Неверный e-mail")
     @NotNull(groups = Create.class)
     private String email;
 

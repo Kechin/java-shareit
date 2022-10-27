@@ -2,8 +2,6 @@ package ru.practicum.shareit.user.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -13,8 +11,6 @@ import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Slf4j
@@ -29,8 +25,9 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return UserMapper.toUserDto(user);
     }
+
     @Override
-    public UserDto update(UserDto userDto, Long id)  {
+    public UserDto update(UserDto userDto, Long id) {
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
         User oldUser = getUser(id);
         if (userDto.getEmail() != null) {
@@ -52,10 +49,11 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(e.getMessage());
         }
     }
-   // @Transactional(readOnly = true)
-     private User getUser(Long userId)  {
 
-        return  userRepository.findById(userId).orElseThrow(() ->
+    // @Transactional(readOnly = true)
+    private User getUser(Long userId) {
+
+        return userRepository.findById(userId).orElseThrow(() ->
                 new RuntimeException("неверный ID"));
     }
 
@@ -69,7 +67,6 @@ public class UserServiceImpl implements UserService {
         log.info("Запрос на удаления пользователя " + userId);
         userRepository.deleteById(userId);
     }
-
 
 
 }

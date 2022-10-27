@@ -34,30 +34,31 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+
     @Override
-    public ItemDto create(ItemDto itemDto, Long userId)  {
+    public ItemDto create(ItemDto itemDto, Long userId) {
         log.info("Запрос на добавление " + userId + " " + itemDto);
         itemDto.setOwner(UserMapper.toUserDto(getUser(userId)));
         Item newItem = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto( itemRepository.save(newItem));
+        return ItemMapper.toItemDto(itemRepository.save(newItem));
     }
+
     @Override
     public ItemDto update(Long id, ItemDto itemDto, Long userId) {
         log.info("Запрос на обновление " + userId + " " + itemDto);
         User user = getUser(userId);
-        Item oldItem= getItem(id);
-        if (!userId.equals( oldItem.getOwner().getId())) {
-            System.out.println("id old"+ getItem(id).getId()+" "+user.getId());
+        Item oldItem = getItem(id);
+        if (!userId.equals(oldItem.getOwner().getId())) {
+            System.out.println("id old" + getItem(id).getId() + " " + user.getId());
             throw new NotFoundException("ID пользователя не соотвествует Владельцу");
-        }
-        else {
-            if (itemDto.getAvailable()!=null){
+        } else {
+            if (itemDto.getAvailable() != null) {
                 oldItem.setAvailable(itemDto.getAvailable());
             }
-            if (itemDto.getDescription()!=null){
+            if (itemDto.getDescription() != null) {
                 oldItem.setDescription(itemDto.getDescription());
             }
-            if(itemDto.getName()!=null){
+            if (itemDto.getName() != null) {
                 oldItem.setName(itemDto.getName());
             }
             itemRepository.save(oldItem);
@@ -66,18 +67,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
 
-   @Override
-    public ItemDtoWithBooking getByItemId(Long itemId){
-        log.info("Получение  Item  по ID"+itemId);
-       ItemDtoWithBooking itemDto =  ItemMapper.itemDtoWithBooking(itemRepository.findById(itemId).orElseThrow(()->
-       new NotFoundException("Item не найден")));
+    @Override
+    public ItemDtoWithBooking getByItemId(Long itemId) {
+        log.info("Получение  Item  по ID" + itemId);
+        ItemDtoWithBooking itemDto = ItemMapper.itemDtoWithBooking(itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("Item не найден")));
 
-       log.info("Получен Item"+itemDto);
-       return itemDto;
+        log.info("Получен Item" + itemDto);
+        return itemDto;
     }
 
     @Override
-    public ItemDtoWithBooking getByOwnerIdAndUserId(Long itemId, Long userId)  {
+    public ItemDtoWithBooking getByOwnerIdAndUserId(Long itemId, Long userId) {
         Item item = getItem(itemId);
         ItemDtoWithBooking itemDto = ItemMapper.itemDtoWithBooking(item);
         setComments(itemDto);
@@ -102,9 +103,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getByText(String text) {
-        if (text.isBlank()) {return Collections.emptyList();}
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
         return itemRepository
-               .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue //lol
+                .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue //lol
                         (text, text).stream().map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }

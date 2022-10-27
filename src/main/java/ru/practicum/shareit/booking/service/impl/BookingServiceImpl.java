@@ -72,7 +72,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-
     @Override
     public List<BookingDto> getByText(String text) {
         return null;
@@ -89,6 +88,7 @@ public class BookingServiceImpl implements BookingService {
         }
         return booking;
     }
+
     @Override
     public List<BookingDto> getAllByBooker(Long bookerId, String state) {
         getUser(bookerId);
@@ -101,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
                 .bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
         switch (BookingReqState.valueOf(state)) {
             case ALL:
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc( bookerId));
+                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
@@ -122,13 +122,14 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdAndStatusEqualsOrderByEndDesc
-                      (bookerId, Status.REJECTED));
+                        (bookerId, Status.REJECTED));
             default:
                 throw new ValidationException("");
         }
 
 
     }
+
     @Override
     public List<BookingDto> getAllByOwner(Long ownerId, String state) {
         getUser(ownerId);
@@ -169,19 +170,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-    private User getUser(Long userId)  {
-        return  userRepository.findById(userId).orElseThrow(() ->
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("неверный User ID"));
     }
-    private Item getItem(Long itemId)  {
-        return  itemRepository.findById(itemId).orElseThrow(() ->
-               new NotFoundException("неверный Item ID"));
+
+    private Item getItem(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("неверный Item ID"));
     }
-    private void dataCheck(LocalDateTime start, LocalDateTime end){
+
+    private void dataCheck(LocalDateTime start, LocalDateTime end) {
 
         LocalDateTime now = LocalDateTime.now().minusSeconds(5L);
-        if (start.isAfter(end) || start.equals(end)|| start.isBefore(now)|| end.isBefore(now)){
-            throw  new ValidationException("Неверные даты");
+        if (start.isAfter(end) || start.equals(end) || start.isBefore(now) || end.isBefore(now)) {
+            throw new ValidationException("Неверные даты");
         }
     }
 

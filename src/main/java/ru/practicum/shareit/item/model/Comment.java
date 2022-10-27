@@ -25,7 +25,7 @@ public class Comment {
     @NotBlank
     private String text;
 
-    @ManyToOne  (optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "item_id")
     private Item item;
     @ManyToOne(optional = false)

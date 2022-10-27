@@ -23,6 +23,7 @@ public class ErrorHandler {
         log.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler
     public ResponseEntity<String> handleIncorrectParameterException(final ValidationException e) {
         log.error(e.getMessage());
@@ -42,13 +43,12 @@ public class ErrorHandler {
         });
         return errors;
     }
+
     @ExceptionHandler
     public ResponseEntity<String> handleThrowable(final Throwable e) {
         log.error(e.getMessage() + "  " + HttpStatus.INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-
 
 
 }

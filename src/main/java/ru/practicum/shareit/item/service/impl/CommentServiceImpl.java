@@ -29,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+
     @Override
     public CommentDto create(Long itemId, Long userId, CommentDto commentText) throws Throwable {
         log.info("Запрос на добавление коммента " + userId + " " + commentText);

@@ -26,9 +26,10 @@ public class ItemController {
 
     private final ItemService itemService;
     private final CommentService commentService;
+
     @PostMapping
     ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId, @Validated({Create.class})
-                    @RequestBody ItemDto itemDto) throws Throwable {
+    @RequestBody ItemDto itemDto) throws Throwable {
         return itemService.create(itemDto, userId);
     }
 
