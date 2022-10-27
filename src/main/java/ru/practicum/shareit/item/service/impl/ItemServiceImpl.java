@@ -78,68 +78,70 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDtoWithBooking getByOwnerIdAndUserId(Long itemId, Long userId)  {
-        Item item =getItem(itemId);
-
-        if(!item.getOwner().getId().equals(userId)){
-            return ItemMapper.itemDtoWithBooking(item);
+        Item item = getItem(itemId);
+        ItemDtoWithBooking itemDto = ItemMapper.itemDtoWithBooking(item);
+        setComments(itemDto);
+        if (!item.getOwner().getId().equals(userId)) {
+            return itemDto;
         }
-        log.info("Вывод item по bookerId");
-
-       return setComments( ItemMapper.itemDtoWithBooking(item));
+        log.info("Вывод item по bookerId" + itemDto);
+        return setLastAndNextBookings(itemDto);
 
     }
+
     @Override
-    public List<ItemDto> getAllByUserId(Long userId){
+    public List<ItemDtoWithBooking> getAllByUserId(Long userId) {
         getUser(userId);
-        List< ItemDto> itemDto =ItemMapper.toItemDtos( itemRepository.findItemsByOwnerId(userId));
-        log.info("getAllByUserId"+itemDto);
-        return itemDto;
+        List<ItemDtoWithBooking> itemDto = ItemMapper.itemDtoWithBookings(itemRepository.findItemsByOwnerId(userId));
+
+        return itemDto.stream()
+                .map(i -> setLastAndNextBookings(i))
+                .map(i -> setComments(i))
+                .collect(Collectors.toList());
     }
+
     @Override
     public List<ItemDto> getByText(String text) {
         if (text.isBlank()) {return Collections.emptyList();}
         return itemRepository
                .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue //lol
-                       (text,text).stream().map(ItemMapper::toItemDto)
-               .collect(Collectors.toList());
+                        (text, text).stream().map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
 
-    private User getUser(Long userId)  {
+    private User getUser(Long userId) {
 
-        return  userRepository.findById(userId).orElseThrow(() ->
+        return userRepository.findById(userId).orElseThrow(() ->
                 new RuntimeException("неверный ID"));
     }
-    private ItemDtoWithBooking setComments(ItemDtoWithBooking itemDto){
-       log.info(commentRepository.findAll().toString());
-        itemDto.setComments(CommentMapper.toCommentDtos( commentRepository.findCommentsByItem_Id(itemDto.getId())));
-        Booking lastBooking= bookingRepository
+
+    private ItemDtoWithBooking setLastAndNextBookings(ItemDtoWithBooking itemDto) {
+
+        Booking lastBooking = bookingRepository
                 .findFirstByItemIdAndEndIsBeforeOrderByEndDesc(itemDto.getId(), LocalDateTime.now());
-        Booking nextBooking= bookingRepository
-                .findFirstByItemIdAndStartIsAfterOrderByEnd(itemDto.getId(),LocalDateTime.now());
-                    if (lastBooking!=null){itemDto.setLastBooking(BookingMapper.bookingShortDto(lastBooking));}
-                    if (nextBooking!=null){itemDto.setNextBooking(BookingMapper.bookingShortDto(nextBooking));}
-
-
-        return itemDto;
-    }
-    private ItemDtoWithBooking setComments2(ItemDtoWithBooking itemDto, Long bookerId){
-        log.info("Установка комментариев" + itemDto);
-        itemDto.setComments(CommentMapper.toCommentDtos( commentRepository.findCommentsByItem_Id(itemDto.getId())));
-        Booking lastBooking= bookingRepository
-                .findFirstByItem_IdAndAndBooker_IdAndEndBeforeOrderByEndDesc(itemDto.getId(),bookerId, LocalDateTime.now());
-        Booking nextBooking= bookingRepository
-                .findFirstByItem_IdAndAndBooker_IdAndStartIsAfterOrderByEnd(itemDto.getId(),bookerId,LocalDateTime.now());
-
+        Booking nextBooking = bookingRepository
+                .findFirstByItemIdAndStartIsAfterOrderByEnd(itemDto.getId(), LocalDateTime.now());
+        if (lastBooking != null) {
             itemDto.setLastBooking(BookingMapper.bookingShortDto(lastBooking));
-
+        }
+        if (nextBooking != null) {
             itemDto.setNextBooking(BookingMapper.bookingShortDto(nextBooking));
+        }
 
 
         return itemDto;
     }
+
+    private ItemDtoWithBooking setComments(ItemDtoWithBooking itemDto) {
+        log.info("Установка комментариев" + itemDto);
+        itemDto.setComments(CommentMapper.toCommentDtos(commentRepository.findAllByItemId(itemDto.getId())));
+        log.info(String.valueOf(itemDto));
+        return itemDto;
+    }
+
     private Item getItem(Long id) {
-        return ( (itemRepository.findById(id)).orElseThrow(()->
+        return ((itemRepository.findById(id)).orElseThrow(() ->
                 new NotFoundException("Item c данным Id не найден")));
     }
 }

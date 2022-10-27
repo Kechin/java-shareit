@@ -39,15 +39,17 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    ItemDtoWithBooking getById(@PathVariable Long id,@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("getByUserId"+id+" "+" "+userId);
-        return itemService.getByOwnerIdAndUserId(id,userId);
+    ItemDtoWithBooking getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("getByUserId" + id + " " + " " + userId);
+        return itemService.getByOwnerIdAndUserId(id, userId);
     }
+
     @GetMapping
-    List<ItemDto> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId){
+    List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("getAllByUserId");
         return itemService.getAllByUserId(userId);
     }
+
     @GetMapping("/search")
     List<ItemDto> getByText(@RequestParam String text) {
 
@@ -56,10 +58,14 @@ public class ItemController {
 
 
     @PostMapping("/{itemId}/comment")
-    CommentDto createComment (@PathVariable Long itemId,  @RequestHeader("X-Sharer-User-Id")Long userId ,
-                            @Valid  @RequestBody CommentDto comment ) throws Throwable {
-       log.info("Запрос на добавление коммента"+comment);
-        return commentService.create(itemId,userId,comment);
+    CommentDto createComment(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId,
+                             @Valid @RequestBody CommentDto comment) throws Throwable {
+        log.info("Запрос на добавление коммента" + comment);
+        return commentService.create(itemId, userId, comment);
     }
 
+    @GetMapping("/allcomment")
+    List<CommentDto> getComments() {
+        return commentService.getAll();
+    }
 }

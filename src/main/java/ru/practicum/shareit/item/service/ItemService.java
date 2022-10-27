@@ -18,5 +18,6 @@ public interface ItemService {
 
 
     List<ItemDto> getByText(String text);
-    List<ItemDto> getAllByUserId(Long userId);
+
+    List<ItemDtoWithBooking> getAllByUserId(Long userId);
 }

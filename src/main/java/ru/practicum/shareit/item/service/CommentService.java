@@ -1,10 +1,11 @@
 package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentText;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
+
+import java.util.List;
 
 public interface CommentService {
     CommentDto create(Long itemId, Long userId, CommentDto comment) throws Throwable;
+
+    List<CommentDto> getAll();
 }

@@ -17,7 +17,6 @@ import java.util.Map;
 @Slf4j
 
 public class ErrorHandler {
-    @ResponseStatus(HttpStatus.NOT_FOUND)
 
     @ExceptionHandler
     public ResponseEntity<String> handleNotFoundException(final NotFoundException e) {

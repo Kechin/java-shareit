@@ -7,8 +7,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.user.model.UserMapper;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 @Component
 
@@ -26,15 +26,10 @@ public class ItemMapper {
     }
     public  static ItemDtoWithBooking itemDtoWithBooking(Item item){
         return new ItemDtoWithBooking(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
-                UserMapper.toUserDto(item.getOwner()),null,null,null);
+                null, null, new ArrayList<>());
     }
     public static List<ItemDtoWithBooking> itemDtoWithBookings(List<Item> items) {
         return items.stream().map(ItemMapper::itemDtoWithBooking).collect(Collectors.toList());
     }
 
-
-    public static List<ItemDto> toItemDtos(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
-
-    }
 }
