@@ -17,23 +17,19 @@ import java.util.Map;
 @Slf4j
 
 public class ErrorHandler {
-    @ExceptionHandler
-    public ResponseEntity<String> handleIncorrectParameterException(final ValidationException e) {
-        log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    @ResponseStatus(HttpStatus.NOT_FOUND)
 
     @ExceptionHandler
     public ResponseEntity<String> handleNotFoundException(final NotFoundException e) {
         log.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
-
     @ExceptionHandler
-    public ResponseEntity<String> handleThrowable(final Throwable e) {
-        log.error(e.getMessage() + "  " + HttpStatus.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleIncorrectParameterException(final ValidationException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -47,5 +43,13 @@ public class ErrorHandler {
         });
         return errors;
     }
+    @ExceptionHandler
+    public ResponseEntity<String> handleThrowable(final Throwable e) {
+        log.error(e.getMessage() + "  " + HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+
 
 }

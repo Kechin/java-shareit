@@ -8,35 +8,29 @@ import ru.practicum.shareit.Create;
 import ru.practicum.shareit.Update;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
-//@Data
-//@AllArgsConstructor
-//@NoArgsConstructor
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class BookingDto {
-    private Long id;
-    private LocalDateTime start;
-    private LocalDateTime end;
-    private Item item;
-    private User booker;
+public class BookingRequestDto {
+
+    @FutureOrPresent
     @NotNull
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    private LocalDateTime start;
+    @FutureOrPresent
+    @NotNull
+    private LocalDateTime end;
+    @NotNull
+    private Long itemId;
 
 }
 
