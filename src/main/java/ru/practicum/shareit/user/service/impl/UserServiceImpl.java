@@ -16,16 +16,18 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
-    public UserDto create(User user) {
-        userRepository.save(user);
+    public UserDto create(UserDto userDto) {
+        User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
+    @Transactional
     @Override
     public UserDto update(UserDto userDto, Long id) {
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
@@ -37,24 +39,19 @@ public class UserServiceImpl implements UserService {
             oldUser.setName(userDto.getName());
         }
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
-        userRepository.save(oldUser);
+
         return UserMapper.toUserDto(oldUser);
     }
 
     @Override
     public UserDto get(Long userId) {
-        try {
-            return UserMapper.toUserDto(getUser(userId));
-        } catch (Throwable e) {
-            throw new NotFoundException(e.getMessage());
-        }
+        return UserMapper.toUserDto(getUser(userId));
     }
 
-    // @Transactional(readOnly = true)
     private User getUser(Long userId) {
 
         return userRepository.findById(userId).orElseThrow(() ->
-                new RuntimeException("неверный ID"));
+                new NotFoundException("неверный ID"));
     }
 
     @Override
@@ -62,8 +59,10 @@ public class UserServiceImpl implements UserService {
         return UserMapper.userDtos(userRepository.findAll());
     }
 
+    @Transactional
     @Override
     public void delete(Long userId) {
+        getUser(userId);
         log.info("Запрос на удаления пользователя " + userId);
         userRepository.deleteById(userId);
     }

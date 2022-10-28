@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,6 +54,9 @@ public class ItemController {
 
     @GetMapping("/search")
     List<ItemDto> getByText(@RequestParam String text) {
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
 
         return itemService.getByText(text);
     }

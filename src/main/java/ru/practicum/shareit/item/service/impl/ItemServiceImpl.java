@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -28,13 +29,15 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final Sort sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
 
+    @Transactional
     @Override
     public ItemDto create(ItemDto itemDto, Long userId) {
         log.info("Запрос на добавление " + userId + " " + itemDto);
@@ -43,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(itemRepository.save(newItem));
     }
 
+    @Transactional
     @Override
     public ItemDto update(Long id, ItemDto itemDto, Long userId) {
         log.info("Запрос на обновление " + userId + " " + itemDto);
@@ -61,7 +65,6 @@ public class ItemServiceImpl implements ItemService {
             if (itemDto.getName() != null) {
                 oldItem.setName(itemDto.getName());
             }
-            itemRepository.save(oldItem);
         }
         return ItemMapper.toItemDto(oldItem);
     }
@@ -70,8 +73,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDtoWithBooking getByItemId(Long itemId) {
         log.info("Получение  Item  по ID" + itemId);
-        ItemDtoWithBooking itemDto = ItemMapper.itemDtoWithBooking(itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException("Item не найден")));
+        ItemDtoWithBooking itemDto = ItemMapper.itemDtoWithBooking(itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Item не найден")));
 
         log.info("Получен Item" + itemDto);
         return itemDto;
@@ -87,18 +89,13 @@ public class ItemServiceImpl implements ItemService {
         }
         log.info("Вывод item по bookerId" + itemDto);
         return setLastAndNextBookings(itemDto);
-
     }
 
     @Override
     public List<ItemDtoWithBooking> getAllByUserId(Long userId) {
         getUser(userId);
         List<ItemDtoWithBooking> itemDto = ItemMapper.itemDtoWithBookings(itemRepository.findItemsByOwnerId(userId));
-
-        return itemDto.stream()
-                .map(i -> setLastAndNextBookings(i))
-                .map(i -> setComments(i))
-                .collect(Collectors.toList());
+        return itemDto.stream().map(i -> setLastAndNextBookings(i)).map(i -> setComments(i)).collect(Collectors.toList());
     }
 
     @Override
@@ -106,34 +103,24 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-
-        return itemRepository
-                .findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue(text, text)
-                .stream().map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemRepository.findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue(text, text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
 
     private User getUser(Long userId) {
-
-        return userRepository.findById(userId).orElseThrow(() ->
-                new RuntimeException("неверный ID"));
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("неверный ID"));
     }
 
     private ItemDtoWithBooking setLastAndNextBookings(ItemDtoWithBooking itemDto) {
 
-        Booking lastBooking = bookingRepository
-                .findFirstByItemIdAndEndIsBeforeOrderByEndDesc(itemDto.getId(), LocalDateTime.now());
-        Booking nextBooking = bookingRepository
-                .findFirstByItemIdAndStartIsAfterOrderByEnd(itemDto.getId(), LocalDateTime.now());
+        Booking lastBooking = bookingRepository.findFirstByItemIdAndEndIsBefore(itemDto.getId(), LocalDateTime.now(), sortByDescEnd);
+        Booking nextBooking = bookingRepository.findFirstByItemIdAndStartIsAfterOrderByEnd(itemDto.getId(), LocalDateTime.now());
         if (lastBooking != null) {
             itemDto.setLastBooking(BookingMapper.bookingShortDto(lastBooking));
         }
         if (nextBooking != null) {
             itemDto.setNextBooking(BookingMapper.bookingShortDto(nextBooking));
         }
-
-
         return itemDto;
     }
 
@@ -145,8 +132,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Item getItem(Long id) {
-        return ((itemRepository.findById(id)).orElseThrow(() ->
-                new NotFoundException("Item c данным Id не найден")));
+        return ((itemRepository.findById(id)).orElseThrow(() -> new NotFoundException("Item c данным Id не найден")));
     }
 
 }

@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -25,13 +26,15 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final Sort sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
 
     @Override
+    @Transactional
     public BookingDto create(BookingRequestDto bookingDto, Long bookerId) {
         dataCheck(bookingDto.getStart(), bookingDto.getEnd());
         Item item = getItem(bookingDto.getItemId());
@@ -52,6 +55,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto update(Long id, Long userId, Boolean approved) {
         log.info("Попытка обновить статус бронирования");
         Booking booking = bookingRepository.findById(id).orElseThrow(()
@@ -105,23 +109,23 @@ public class BookingServiceImpl implements BookingService {
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndEndIsBeforeOrderByEndDesc(bookerId, n));
+                        .findBookingsByBookerIdAndEndIsBefore(bookerId, n, sortByDescEnd));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsAfterOrderByEndDesc(bookerId, n));
+                        .findBookingsByBookerIdAndStartIsAfter(bookerId, n, sortByDescEnd));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(bookerId, n, n));
+                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(bookerId, n, n, sortByDescEnd));
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStatusEqualsOrderByEndDesc(bookerId, Status.WAITING));
+                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.WAITING, sortByDescEnd));
 
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStatusEqualsOrderByEndDesc(bookerId, Status.REJECTED));
+                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.REJECTED, sortByDescEnd));
             default:
                 throw new ValidationException("");
         }
@@ -145,23 +149,23 @@ public class BookingServiceImpl implements BookingService {
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndEndIsBeforeOrderByEndDesc(ownerId, n));
+                        .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, n, sortByDescEnd));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsAfterOrderByEndDesc(ownerId, n));
+                        .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, n, sortByDescEnd));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(ownerId, n, n));
+                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(ownerId, n, n, sortByDescEnd));
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStatusEqualsOrderByEndDesc(ownerId, Status.WAITING));
+                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.WAITING, sortByDescEnd));
 
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStatusEqualsOrderByEndDesc(ownerId, Status.REJECTED));
+                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.REJECTED, sortByDescEnd));
             default:
                 throw new ValidationException("");
         }
@@ -181,8 +185,8 @@ public class BookingServiceImpl implements BookingService {
 
     private void dataCheck(LocalDateTime start, LocalDateTime end) {
 
-        LocalDateTime now = LocalDateTime.now().minusSeconds(5L);
-        if (start.isAfter(end) || start.equals(end) || start.isBefore(now) || end.isBefore(now)) {
+        LocalDateTime now = LocalDateTime.now();
+        if (!start.isBefore(end)) {
             throw new ValidationException("Неверные даты");
         }
     }
