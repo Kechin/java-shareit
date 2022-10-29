@@ -30,7 +30,7 @@ public class ItemController {
 
     @PostMapping
     ItemDto create(@RequestHeader("X-Sharer-User-Id") Long userId, @Validated({Create.class})
-    @RequestBody ItemDto itemDto) throws Throwable {
+    @RequestBody ItemDto itemDto) {
         return itemService.create(itemDto, userId);
     }
 
@@ -64,7 +64,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     CommentDto createComment(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId,
-                             @Valid @RequestBody CommentDto comment) throws Throwable {
+                             @Valid @RequestBody CommentDto comment) {
         log.info("Запрос на добавление коммента" + comment);
         return commentService.create(itemId, userId, comment);
     }

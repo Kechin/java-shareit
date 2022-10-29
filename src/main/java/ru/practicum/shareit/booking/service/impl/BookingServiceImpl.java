@@ -96,28 +96,29 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getAllByBooker(Long bookerId, String state) {
         getUser(bookerId);
+        BookingReqState eState;
         try {
-            BookingReqState eState = BookingReqState.valueOf(state);
+            eState = BookingReqState.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
-        var n = LocalDateTime.now();
+        var dateNow = LocalDateTime.now();
 
-        switch (BookingReqState.valueOf(state)) {
+        switch (eState) {
             case ALL:
                 return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndEndIsBefore(bookerId, n, sortByDescEnd));
+                        .findBookingsByBookerIdAndEndIsBefore(bookerId, dateNow, sortByDescEnd));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsAfter(bookerId, n, sortByDescEnd));
+                        .findBookingsByBookerIdAndStartIsAfter(bookerId, dateNow, sortByDescEnd));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(bookerId, n, n, sortByDescEnd));
+                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(bookerId, dateNow, dateNow, sortByDescEnd));
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByBookerIdAndStatusEquals(bookerId, Status.WAITING, sortByDescEnd));
@@ -127,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByBookerIdAndStatusEquals(bookerId, Status.REJECTED, sortByDescEnd));
             default:
-                throw new ValidationException("");
+                throw new ValidationException("Неверный статус");
         }
 
 
@@ -136,12 +137,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getAllByOwner(Long ownerId, String state) {
         getUser(ownerId);
+        BookingReqState eState;
         try {
-            BookingReqState eState = BookingReqState.valueOf(state);
+            eState = BookingReqState.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
-        var n = LocalDateTime.now();
+        var dateNow = LocalDateTime.now();
         switch (BookingReqState.valueOf(state)) {
             case ALL:
                 return BookingMapper.bookingDtos(bookingRepository
@@ -149,15 +151,15 @@ public class BookingServiceImpl implements BookingService {
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, n, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, dateNow, sortByDescEnd));
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, n, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, dateNow, sortByDescEnd));
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(ownerId, n, n, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(ownerId, dateNow, dateNow, sortByDescEnd));
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.WAITING, sortByDescEnd));
@@ -167,7 +169,7 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.REJECTED, sortByDescEnd));
             default:
-                throw new ValidationException("");
+                throw new ValidationException("Неверный статус");
         }
 
     }
@@ -185,7 +187,6 @@ public class BookingServiceImpl implements BookingService {
 
     private void dataCheck(LocalDateTime start, LocalDateTime end) {
 
-        LocalDateTime now = LocalDateTime.now();
         if (!start.isBefore(end)) {
             throw new ValidationException("Неверные даты");
         }

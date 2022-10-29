@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ItemService {
 
-    ItemDto create(ItemDto itemDto, Long userId) throws Throwable;
+    ItemDto create(ItemDto itemDto, Long userId);
 
     ItemDto update(Long id, ItemDto itemDto, Long userId);
 

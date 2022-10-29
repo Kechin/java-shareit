@@ -22,7 +22,6 @@ import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,9 +99,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getByText(String text) {
-        if (text.isBlank()) {
-            return Collections.emptyList();
-        }
+
         return itemRepository.findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue(text, text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 

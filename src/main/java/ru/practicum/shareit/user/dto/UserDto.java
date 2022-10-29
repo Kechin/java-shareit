@@ -9,6 +9,7 @@ import ru.practicum.shareit.Update;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class UserDto {
     private Long id;
     @NotBlank(groups = {Create.class})
     private String name;
-    @NotBlank(groups = {Create.class})
+    @NotNull(groups = {Create.class})
     @Email(groups = {Create.class, Update.class}, message = "Неверный email")
     private String email;
 }
