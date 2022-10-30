@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -15,29 +16,30 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
 
+    @Transactional
     @Override
     public UserDto create(UserDto userDto) {
-        addEmail(userDto.getEmail());
-        User user = userRepository.add(UserMapper.toUser(userDto));
+        User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
+    @Transactional
     @Override
     public UserDto update(UserDto userDto, Long id) {
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
         User oldUser = getUser(id);
         if (userDto.getEmail() != null) {
-            addEmail(userDto.getEmail());
-            userRepository.delEmail(oldUser.getEmail());
             oldUser.setEmail(userDto.getEmail());
         }
         if (userDto.getName() != null) {
             oldUser.setName(userDto.getName());
         }
+        log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
+
         return UserMapper.toUserDto(oldUser);
     }
 
@@ -47,26 +49,23 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUser(Long userId) {
-        return userRepository.getUserById(userId).orElseThrow(() ->
-                new NotFoundException("Пользователя с указанным ID НЕТ!"));
+
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("неверный ID"));
     }
 
     @Override
     public List<UserDto> getAll() {
-
-        return UserMapper.userDtos(userRepository.getUsers());
+        return UserMapper.userDtos(userRepository.findAll());
     }
 
+    @Transactional
     @Override
     public void delete(Long userId) {
+        getUser(userId);
         log.info("Запрос на удаления пользователя " + userId);
-        userRepository.delEmail(getUser(userId).getEmail());
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 
-    private void addEmail(String email) {
-        if (!userRepository.addEmail(email)) {
-            throw new RuntimeException("Пользователь с таким Email уже существует");
-        }
-    }
+
 }

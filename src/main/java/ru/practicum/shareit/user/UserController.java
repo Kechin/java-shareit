@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.Update;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.service.impl.UserServiceImpl;
 
 import java.util.List;
 
@@ -14,15 +14,15 @@ import java.util.List;
  * TODO Sprint add-controllers.
  */
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @PostMapping
-    UserDto create(@Validated({Create.class}) @RequestBody UserDto userDto) {
-        return userService.create(userDto);
+    UserDto create(@Validated({Create.class}) @RequestBody UserDto user) {
+        return userService.create(user);
     }
 
     @PatchMapping("/{userId}")

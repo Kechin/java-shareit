@@ -7,7 +7,7 @@ import java.util.List;
 public interface UserService {
 
 
-    UserDto create(UserDto userDto);
+    UserDto create(UserDto user);
 
     UserDto update(UserDto userDto, Long id);
 
