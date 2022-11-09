@@ -46,17 +46,17 @@ class BookingRepositoryTest {
         sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
         dateTimeAfter = LocalDateTime.of(2022, 1, 1, 1, 1);
         dateTimeBefore = LocalDateTime.of(2026, 1, 1, 1, 1);
-        user1 = new User(1l, "Sergei", "123@gmail,com");
+        user1 = new User(1L, "Sergei", "123@gmail,com");
         userRepository.save(user1);
-        user2 = new User(2l, "Timofei", "223@gmail,com");
+        user2 = new User(2L, "Timofei", "223@gmail,com");
         userRepository.save(user2);
-        user3 = new User(3l, "Evgenii", "323@gmail,com");
+        user3 = new User(3L, "Evgenii", "323@gmail,com");
         userRepository.save(user3);
-        item1 = new Item(1l, "PC", "P1,128Mb", true, user1);
+        item1 = new Item(1L, "PC", "P1,128Mb", true, user1);
         itemRepository.save(item1);
-        item2 = new Item(2l, "PC", "P2,128Mb", true, user1);
+        item2 = new Item(2L, "PC", "P2,128Mb", true, user1);
         itemRepository.save(item2);
-        item3 = new Item(3l, "PC", "P3,128Mb", true, user2);
+        item3 = new Item(3L, "PC", "P3,128Mb", true, user2);
         itemRepository.save(item3);
         LocalDateTime dateTime1 = LocalDateTime.of(2025, 01, 01, 0, 0);
         LocalDateTime dateTime2 = LocalDateTime.of(2025, 02, 01, 0, 0);
@@ -64,11 +64,11 @@ class BookingRepositoryTest {
         LocalDateTime dateTime4 = LocalDateTime.of(2025, 04, 01, 0, 0);
 
 
-        booking1 = new Booking(1l, dateTime1, dateTime2, item1, user2, Status.WAITING);
+        booking1 = new Booking(1L, dateTime1, dateTime2, item1, user2, Status.WAITING);
         bookingRepository.save(booking1);
-        booking2 = new Booking(2l, dateTime2, dateTime3, item2, user2, Status.WAITING);
+        booking2 = new Booking(2L, dateTime2, dateTime3, item2, user2, Status.WAITING);
         bookingRepository.save(booking2);
-        booking3 = new Booking(3l, dateTime3, dateTime4, item3, user1, Status.WAITING);
+        booking3 = new Booking(3L, dateTime3, dateTime4, item3, user1, Status.WAITING);
         bookingRepository.save(booking3);
 
     }
