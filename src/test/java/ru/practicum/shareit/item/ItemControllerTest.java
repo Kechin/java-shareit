@@ -56,9 +56,7 @@ class ItemControllerTest {
                 1L,
                 "PC",
                 " Ibm Pc",
-                true,
-                userDto, null, 
-                null);
+                true, userDto, null, null);
         itemDtoWithBooking = new ItemDtoWithBooking(1L,
                 "PC",
                 " Ibm Pc",
