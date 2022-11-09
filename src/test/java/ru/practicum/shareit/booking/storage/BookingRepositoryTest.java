@@ -39,7 +39,8 @@ class BookingRepositoryTest {
     private LocalDateTime dateTimeBefore;
     private LocalDateTime dateTimeAfter;
     private Sort sortByDescEnd;
-    private final Pageable pageable = PageRequest.of(0, 3, sortByDescEnd);
+    private final Pageable pageable = Pageable.unpaged();
+
 
     @BeforeEach
     void beforeEach() {
