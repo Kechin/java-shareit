@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.BookingMapper;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.ValidationException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -37,14 +38,26 @@ public class BookingController {
 
     @GetMapping
     List<BookingDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByBooker(userId, state);
+                            @RequestParam(defaultValue = "ALL") String state,
+                            @RequestParam(defaultValue = "0") Integer from,
+                            @RequestParam(defaultValue = "10") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new ValidationException("Параметры заданы from и size неверно");
+
+        }
+        return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                   @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByOwner(userId, state);
+                                   @RequestParam(defaultValue = "ALL") String state,
+                                   @RequestParam(defaultValue = "0") Integer from,
+                                   @RequestParam(defaultValue = "10") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new ValidationException("Параметры заданы from и size неверно");
+
+        }
+        return bookingService.getAllByOwner(userId, state, from, size);
     }
 
     @GetMapping("/{id}")

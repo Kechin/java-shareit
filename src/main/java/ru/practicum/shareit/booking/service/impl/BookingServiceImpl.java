@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByBooker(Long bookerId, String state) {
+    public List<BookingDto> getAllByBooker(Long bookerId, String state, Integer from, Integer size) {
         getUser(bookerId);
         BookingReqState eState;
         try {
@@ -103,30 +105,34 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
         var dateNow = LocalDateTime.now();
-
+        Pageable pageable = PageRequest.of(from / size, size, sortByDescEnd);
         switch (eState) {
             case ALL:
-                return BookingMapper.bookingDtos(bookingRepository.findBookingsByBookerIdOrderByStartDesc(bookerId));
+                return BookingMapper.bookingDtos(bookingRepository
+                        .findBookingsByBookerIdOrderByStartDesc(bookerId, pageable).toList());
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndEndIsBefore(bookerId, dateNow, sortByDescEnd));
+                        .findBookingsByBookerIdAndEndIsBefore(bookerId, dateNow, pageable).toList());
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsAfter(bookerId, dateNow, sortByDescEnd));
+                        .findBookingsByBookerIdAndStartIsAfter(bookerId, dateNow, pageable).toList());
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(bookerId, dateNow, dateNow, sortByDescEnd));
+                        .findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(bookerId, dateNow, dateNow, pageable)
+                        .toList());
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.WAITING, sortByDescEnd));
+                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.WAITING, pageable)
+                        .toList());
 
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.REJECTED, sortByDescEnd));
+                        .findBookingsByBookerIdAndStatusEquals(bookerId, Status.REJECTED, pageable)
+                        .toList());
             default:
                 throw new ValidationException("Неверный статус");
         }
@@ -135,7 +141,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByOwner(Long ownerId, String state) {
+    public List<BookingDto> getAllByOwner(Long ownerId, String state, Integer from, Integer size) {
+
         getUser(ownerId);
         BookingReqState eState;
         try {
@@ -144,30 +151,34 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("{\"error\"" + ":" + "\"Unknown state: " + state + "\"}");
         }
         var dateNow = LocalDateTime.now();
-        switch (BookingReqState.valueOf(state)) {
+        Pageable pageable = PageRequest.of(from / size, size, sortByDescEnd);
+        switch (eState) {
             case ALL:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdOrderByStartDesc(ownerId));
+                        .findBookingsByItem_Owner_IdOrderByStartDesc(ownerId, pageable).toList());
 
             case PAST:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, dateNow, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, dateNow, pageable).toList());
 
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, dateNow, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, dateNow, pageable).toList());
 
             case CURRENT:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(ownerId, dateNow, dateNow, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(ownerId, dateNow, dateNow, pageable)
+                        .toList());
             case WAITING:
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.WAITING, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.WAITING, pageable)
+                        .toList());
 
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository
-                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.REJECTED, sortByDescEnd));
+                        .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.REJECTED, pageable)
+                        .toList());
             default:
                 throw new ValidationException("Неверный статус");
         }

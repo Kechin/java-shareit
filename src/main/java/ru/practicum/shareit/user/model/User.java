@@ -23,4 +23,8 @@ public class User {
     @Column(name = "email", unique = true, nullable = false, length = 512)
     private String email;
 
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }

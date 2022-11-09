@@ -17,6 +17,8 @@ import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.user.storage.UserRepository;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
@@ -42,6 +45,11 @@ public class ItemServiceImpl implements ItemService {
         log.info("Запрос на добавление " + userId + " " + itemDto);
         itemDto.setOwner(UserMapper.toUserDto(getUser(userId)));
         Item newItem = ItemMapper.toItem(itemDto);
+        Long itemRequestId = itemDto.getRequestId();
+        if (itemRequestId != null) {
+            newItem.setItemRequest(getItemRequest(itemRequestId));
+        }
+
         return ItemMapper.toItemDto(itemRepository.save(newItem));
     }
 
@@ -91,14 +99,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBooking> getAllByUserId(Long userId) {
+    public List<ItemDtoWithBooking> getAllByUserId(Long userId, Integer from, Integer size) {
         getUser(userId);
         List<ItemDtoWithBooking> itemDto = ItemMapper.itemDtoWithBookings(itemRepository.findItemsByOwnerId(userId));
         return itemDto.stream().map(i -> setLastAndNextBookings(i)).map(i -> setComments(i)).collect(Collectors.toList());
     }
 
     @Override
-    public List<ItemDto> getByText(String text) {
+    public List<ItemDto> getByText(String text, Integer from, Integer size) {
 
         return itemRepository.findItemsByDescriptionContainingIgnoreCaseAndAvailableIsTrueOrNameContainingIgnoreCaseAndAvailableIsTrue(text, text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
@@ -130,6 +138,12 @@ public class ItemServiceImpl implements ItemService {
 
     private Item getItem(Long id) {
         return ((itemRepository.findById(id)).orElseThrow(() -> new NotFoundException("Item c данным Id не найден")));
+    }
+
+    private ItemRequest getItemRequest(Long id) {
+        return ((itemRequestRepository.findById(id))
+                .orElseThrow(() -> new NotFoundException("ItemRequest c данным Id не найден")));
+
     }
 
 }

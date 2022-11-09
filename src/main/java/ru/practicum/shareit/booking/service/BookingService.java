@@ -14,11 +14,11 @@ public interface BookingService {
     BookingDto update(Long id, Long userId, Boolean approve);
 
 
-    List<BookingDto> getAllByBooker(Long userId, String state);
+    List<BookingDto> getAllByBooker(Long userId, String state, Integer from, Integer size);
 
     List<BookingDto> getByText(String text);
 
     Booking getById(Long id, Long userId);
 
-    List<BookingDto> getAllByOwner(Long userId, String state);
+    List<BookingDto> getAllByOwner(Long userId, String state, Integer from, Integer size);
 }

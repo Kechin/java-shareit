@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,18 +48,26 @@ public class ItemController {
     }
 
     @GetMapping
-    List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("getAllByUserId");
-        return itemService.getAllByUserId(userId);
+    List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                   @RequestParam(defaultValue = "0") Integer from,
+                                                   @RequestParam(defaultValue = "10") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new ValidationException("Параметры заданы from и size неверно");
+        }
+        return itemService.getAllByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    List<ItemDto> getByText(@RequestParam String text) {
+    List<ItemDto> getByText(@RequestParam String text, @RequestParam(defaultValue = "0") Integer from,
+                            @RequestParam(defaultValue = "10") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new ValidationException("Параметры заданы from и size неверно");
+        }
         if (text.isBlank()) {
             return Collections.emptyList();
         }
 
-        return itemService.getByText(text);
+        return itemService.getByText(text, from, size);
     }
 
 
