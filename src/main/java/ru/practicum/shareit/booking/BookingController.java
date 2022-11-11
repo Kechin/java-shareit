@@ -66,10 +66,6 @@ public class BookingController {
         return BookingMapper.toBookingDto(bookingService.getById(id, userId));
     }
 
-    @GetMapping("/search")
-    List<BookingDto> getByText(@RequestParam String text) {
 
-        return bookingService.getByText(text);
-    }
 
 }

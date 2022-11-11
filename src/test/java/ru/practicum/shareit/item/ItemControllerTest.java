@@ -57,14 +57,12 @@ class ItemControllerTest {
                 "PC",
                 " Ibm Pc",
                 true,
-                userDto, null
-                , null);
+                userDto, null, null);
         itemDtoWithBooking = new ItemDtoWithBooking(1L,
                 "PC",
                 " Ibm Pc",
                 true,
-                null, null
-                , null, null);
+                null, null, null, null);
     }
 
     @Test

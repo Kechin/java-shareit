@@ -10,9 +10,7 @@ import ru.practicum.shareit.user.service.impl.UserServiceImpl;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +29,26 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ItemRequestRepository itemRequestRepository;
+    @Autowired
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final Sort sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
+
+    @Autowired
+    public ItemServiceImpl(ItemRepository itemRepository, ItemRequestRepository itemRequestRepository,
+                           UserRepository userRepository, CommentRepository commentRepository,
+                           BookingRepository bookingRepository) {
+        this.itemRepository = itemRepository;
+        this.itemRequestRepository = itemRequestRepository;
+        this.userRepository = userRepository;
+        this.commentRepository = commentRepository;
+        this.bookingRepository = bookingRepository;
+    }
 
     @Transactional
     @Override
@@ -113,7 +124,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("неверный ID"));
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("неверный user ID"));
     }
 
     private ItemDtoWithBooking setLastAndNextBookings(ItemDtoWithBooking itemDto) {

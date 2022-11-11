@@ -16,7 +16,6 @@ public interface BookingService {
 
     List<BookingDto> getAllByBooker(Long userId, String state, Integer from, Integer size);
 
-    List<BookingDto> getByText(String text);
 
     Booking getById(Long id, Long userId);
 

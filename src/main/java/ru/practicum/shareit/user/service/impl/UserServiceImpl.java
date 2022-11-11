@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,14 +15,20 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    @Autowired
+    public UserServiceImpl(UserRepository repository) {
+        this.userRepository = repository;
+    }
+
     @Transactional
     @Override
     public UserDto create(UserDto userDto) {
+        log.info("Запрос на добавления нового пользователя" + userDto);
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }

@@ -79,11 +79,6 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public List<BookingDto> getByText(String text) {
-        return null;
-    }
-
-    @Override
     public Booking getById(Long id, Long userId) {
         getUser(userId);
         Booking booking = bookingRepository.findById(id).orElseThrow(() ->
