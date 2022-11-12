@@ -63,8 +63,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(id).orElseThrow(()
                 -> new NotFoundException("Бронирования с указанным id не существует"));
         if (!booking.getItem().getAvailable()) {
-            throw new ValidationException("Невозможно  забронировать данную вещь " + booking.getItem().getAvailable() +
-                    booking.getItem().getOwner().getId() + " " + userId);
+            throw new ValidationException("Невозможно  забронировать данную вещь");
         }
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new NotFoundException("Вещь не принадлежит пользователю с данным id");
@@ -128,10 +127,8 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByBookerIdAndStatusEquals(bookerId, Status.REJECTED, pageable)
                         .toList());
-            default:
-                throw new ValidationException("Неверный статус");
         }
-
+        throw new ValidationException("Неверный статус");
 
     }
 
@@ -156,6 +153,7 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndEndIsBefore(ownerId, dateNow, pageable).toList());
 
+
             case FUTURE:
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStartIsAfter(ownerId, dateNow, pageable).toList());
@@ -168,16 +166,15 @@ public class BookingServiceImpl implements BookingService {
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.WAITING, pageable)
                         .toList());
-
             case REJECTED:
                 log.info("Rejected");
                 return BookingMapper.bookingDtos(bookingRepository
                         .findBookingsByItem_Owner_IdAndStatusEquals(ownerId, Status.REJECTED, pageable)
                         .toList());
-            default:
-                throw new ValidationException("Неверный статус");
-        }
 
+
+        }
+        throw new ValidationException("Неверный статус");
     }
 
 
