@@ -54,7 +54,7 @@ class BookingServiceImplTest {
         owner = new User(2L, "Owner", "re@df.dd");
         item = new Item(1L, "PC", "IBM PC", true, owner);
         comment = new Comment(1L, "Cool", item, user, LocalDateTime.now());
-        booking = new Booking(1L, LocalDateTime.now().plusDays(4L), LocalDateTime.now().plusDays(10L), item, user, Status.APPROVED);
+        booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(2L), item, user, Status.WAITING);
     }
 
     @Test
@@ -71,35 +71,83 @@ class BookingServiceImplTest {
                 .thenReturn(booking);
         Assertions.assertEquals(bookingService.create(BookingMapper.bookingRequestDto(booking), 1L).getBooker(),
                 BookingMapper.toBookingDto(booking).getBooker());
+
+
+        NotFoundException exception2 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 2L));
+        Assertions.assertEquals("Невозможно забронировать вещь с указанным ID",
+                exception2.getMessage());
+
+
+        item.setAvailable(false);
+        booking.setItem(item);
+        ValidationException exception3 = Assertions.assertThrows(
+                ValidationException.class,
+                () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 1L));
+        Assertions.assertEquals("Вещь была забронирована ранее",
+                exception3.getMessage());
     }
 
     @Test
     void update() {
         getItem();
-        NotFoundException exception = Assertions.assertThrows(
-                NotFoundException.class,
-                () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 0L));
-        Assertions.assertEquals("неверный User ID",
-                exception.getMessage());
         getUser();
         getBooker();
+        ValidationException exception4 = Assertions.assertThrows(
+                ValidationException.class,
+                () -> bookingService.update(1L, 2L, null));
+        Assertions.assertEquals("ОШИБКА в переданном статусе бронирования WAITING",
+                exception4.getMessage());
+        NotFoundException exception = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.update(12L, 1L, true));
+        Assertions.assertEquals("Booking с указанным ID не найден",
+                exception.getMessage());
+
+
         when(bookingRepository.save(any()))
                 .thenReturn(booking);
         Assertions.assertEquals(bookingService.update(1L, 2L, false).getBooker(),
                 BookingMapper.toBookingDto(booking).getBooker());
+
+        NotFoundException exception2 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.update(3L, 1L, true));
+        Assertions.assertEquals("Вещь не принадлежит пользователю с данным id",
+                exception2.getMessage());
+
+        item.setAvailable(false);
+        booking.setItem(item);
+        ValidationException exception3 = Assertions.assertThrows(
+                ValidationException.class,
+                () -> bookingService.update(1L, 1L, true));
+        Assertions.assertEquals("Невозможно  забронировать данную вещь",
+                exception3.getMessage());
+
+
     }
 
     @Test
     void getById() {
-        NotFoundException exception = Assertions.assertThrows(
-                NotFoundException.class,
-                () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 0L));
-        Assertions.assertEquals("неверный Item ID",
-                exception.getMessage());
         getUser();
+
+        NotFoundException exception2 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.getById(12L, 2L));
+        Assertions.assertEquals("Неверный Booking ID",
+                exception2.getMessage());
+        getBooker();
+
         when(bookingRepository.findById(1L))
                 .thenReturn(Optional.of(booking));
         Assertions.assertEquals(bookingService.getById(1L, 1L), booking);
+        NotFoundException exception = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.getById(1L, 12L));
+        Assertions.assertEquals("User с указанным ID не найден",
+                exception.getMessage());
+
     }
 
     //    serValidation();
@@ -107,11 +155,13 @@ class BookingServiceImplTest {
 //            .thenReturn(new PageImpl<>(Collections.singletonList(item1)));
 //    when(mapper.toInfoItemDto(any())).thenReturn(infoItemDto1);
 //        Assertions.assertEquals(new ArrayList<>(List.of(infoItemDto1)),
-//            itemService.getAllItemsByOwnerId(1L, PageRequest.of(0, 10)));
+//            itemService.ItemsByOwnerId(1L, PageRequest.of(0, 10)));
 //}
     @Test
     void getAllByBooker() {
         getUser();
+        getItem();
+        getBooker();
         ValidationException exception = Assertions.assertThrows(
                 ValidationException.class,
                 () -> bookingService.getAllByBooker(1L, "ALLP", 0, 2));
@@ -121,13 +171,88 @@ class BookingServiceImplTest {
         when(bookingRepository.findBookingsByBookerIdOrderByStartDesc(any(), any()))
                 .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
         Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
-                bookingService.getAllByBooker(1L, "ALL", 0, 2));
+                bookingService.getAllByBooker(2L, "ALL", 0, 2));
+        //past
+        booking.setEnd(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByBookerIdAndEndIsBefore(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByBooker(2L, "PAST", 0, 2));
 
+
+        //future
+        booking.setStart(LocalDateTime.now().plusDays(100));
+        when(bookingRepository.findBookingsByBookerIdAndStartIsAfter(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByBooker(2L, "FUTURE", 0, 2));
+
+
+        //current
+        booking.setStart(LocalDateTime.now().minusDays(1));
+        when(bookingRepository.findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByBooker(2L, "CURRENT", 0, 2));
+
+
+        //waiting
+        when(bookingRepository.findBookingsByBookerIdAndStatusEquals(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByBooker(2L, "WAITING", 0, 2));
+        //rejected
+        booking.setStatus(Status.REJECTED);
+        when(bookingRepository.findBookingsByBookerIdAndStatusEquals(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByBooker(2L, "REJECTED", 0, 2));
     }
 
     @Test
     void getAllByOwner() {
         getUser();
+        when(bookingRepository.findBookingsByItem_Owner_IdOrderByStartDesc(any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "ALL", 0, 2));
+        //past
+        booking.setStart(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByItem_Owner_IdAndEndIsBefore(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "PAST", 0, 2));
+
+        //future
+        booking.setEnd(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByItem_Owner_IdAndStartIsAfter(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "FUTURE", 0, 2));
+
+        //current
+        booking.setEnd(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "CURRENT", 0, 2));
+
+        //waiting
+        booking.setEnd(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByItem_Owner_IdAndStatusEquals(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "WAITING", 0, 2));
+
+        //rejected
+        booking.setEnd(LocalDateTime.now().minusDays(100));
+        when(bookingRepository.findBookingsByItem_Owner_IdAndStatusEquals(any(), any(), any()))
+                .thenReturn(new PageImpl<>(Collections.singletonList(booking)));
+        Assertions.assertEquals(new ArrayList<>(List.of(BookingMapper.toBookingDto(booking))),
+                bookingService.getAllByOwner(2L, "REJECTED", 0, 2));
+
         ValidationException exception = Assertions.assertThrows(
                 ValidationException.class,
                 () -> bookingService.getAllByOwner(1L, "ALLP", 0, 2));
@@ -174,17 +299,5 @@ class BookingServiceImplTest {
         });
     }
 
-    @Test
-    void findBookingsByItem_Owner_IdOrderByStartDesc() {
-        when(bookingRepository.findBookingsByItem_Owner_IdOrderByStartDesc(anyLong(), any()))
-                .thenAnswer(invocationOnMock -> {
-                    Long bookingId = invocationOnMock.getArgument(0, Long.class);
-                    if (bookingId > 3) {
-                        throw new NotFoundException(
-                                String.format("Booking с указанным ID не найден"));
-                    } else {
-                        return Optional.of(booking);
-                    }
-                });
-    }
+
 }
