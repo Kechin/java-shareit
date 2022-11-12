@@ -27,6 +27,9 @@ public class BookingMapper {
         return booking;
     }
 
+    public static BookingRequestDto bookingRequestDto(Booking booking) {
+        return new BookingRequestDto(booking.getStart(), booking.getEnd(), booking.getId());
+    }
 
     public static BookingDto toBookingDto(Booking booking) {
         log.info("попытка создать BookingDto " + booking);

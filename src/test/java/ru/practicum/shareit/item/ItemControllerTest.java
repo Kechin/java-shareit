@@ -17,14 +17,13 @@ import ru.practicum.shareit.item.service.impl.ItemServiceImpl;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemControllerTest {
@@ -86,7 +85,7 @@ class ItemControllerTest {
         when(itemService.update(any(), any(), any()))
                 .thenReturn(itemDto);
 
-        mvc.perform(patch("/items/{itemId}", 1)
+        mvc.perform(patch("/items/{id}", 1)
                         .header("X-Sharer-User-Id", "1")
                         .content(mapper.writeValueAsString(itemDto))
                         .characterEncoding(StandardCharsets.UTF_8)
@@ -96,6 +95,40 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is("IBM")));
     }
+//    @GetMapping("/{id}")
+//    ItemDtoWithBooking getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
+//        log.info("getByUserId" + id + " " + " " + userId);
+//        return itemService.getByOwnerIdAndUserId(id, userId);
+//    }
+
+    @Test
+    void getByText() throws Exception {
+
+        when(itemService.getByText(any(), any(), any())).thenReturn(List.of(itemDto));
+
+        mvc.perform(get("/items/search")
+                        .param("text", "")
+                        .param("from", "0")
+                        .param("size", "1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+
+        mvc.perform(get("/items/search")
+                        .param("text", "PC")
+                        .param("from", "0")
+                        .param("size", "1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
+
+
+    }
 
 
 }
+
