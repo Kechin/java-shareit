@@ -108,6 +108,11 @@ class ItemServiceImplTest {
         when(itemRepository.findById(1L))
                 .thenReturn(Optional.of(item));
         Assertions.assertEquals(itemService.getByItemId(1L), ItemMapper.itemDtoWithBooking(item));
+        NotFoundException exception = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> itemService.getByItemId(0L));
+        Assertions.assertEquals("Item не найден",
+                exception.getMessage());
     }
 
     @Test
