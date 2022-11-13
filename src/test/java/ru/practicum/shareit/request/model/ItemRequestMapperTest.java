@@ -3,12 +3,14 @@ package ru.practicum.shareit.request.model;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SpringBootTest
 class ItemRequestMapperTest {
     private ItemRequest itemRequest;
     private ItemRequestDto itemRequestDto;
