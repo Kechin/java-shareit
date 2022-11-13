@@ -3,10 +3,12 @@ package ru.practicum.shareit.item.service.impl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.CommentMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class CommentServiceImplTest {
+    @MockBean
 
     CommentServiceImpl commentService;
     ItemRepository itemRepository;
@@ -62,19 +65,35 @@ class CommentServiceImplTest {
 
     @Test
     void create() {
+        NotFoundException exception3 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> commentService.create(3L, 1L, CommentMapper.toCommentDto(comment)));
+        Assertions.assertEquals("неверный User ID", exception3.getMessage());
+
+        getUser();
+
+        NotFoundException exception2 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> commentService.create(3L, 1L, CommentMapper.toCommentDto(comment)));
+        Assertions.assertEquals("неверный Item ID",
+                exception2.getMessage());
+        getItem();
+        new ArrayList<>(Collections.singleton(CommentMapper.toCommentDto(comment)));
+        ValidationException exception = Assertions.assertThrows(
+                ValidationException.class,
+                () -> commentService.create(2L, 2L, CommentMapper.toCommentDto(comment)));
+        Assertions.assertEquals("Данный пользователь вещь не использовал.",
+                exception.getMessage());
         when(bookingRepository.findBookingsByItem_IdAndBooker_Id(any(), any())).thenReturn(List.of(booking));
 
-        getItem();
 
         when(commentRepository.save(comment))
                 .thenReturn(comment);
 
+
         new ArrayList<>(Collections.singleton(CommentMapper.toCommentDto(comment)));
-        NotFoundException exception = Assertions.assertThrows(
-                NotFoundException.class,
-                () -> commentService.create(2L, 1L, CommentMapper.toCommentDto(comment)));
-        Assertions.assertEquals("неверный User ID",
-                exception.getMessage());
+
+
     }
 
     @Test
