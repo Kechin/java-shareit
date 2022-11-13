@@ -26,6 +26,7 @@ class UserServiceImplTest {
     private User user;
     private User user2;
 
+
     @BeforeEach
     void beforeEach() {
         userRepository = mock(UserRepository.class);

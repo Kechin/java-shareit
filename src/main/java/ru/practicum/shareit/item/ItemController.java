@@ -78,8 +78,8 @@ public class ItemController {
         return commentService.create(itemId, userId, comment);
     }
 
-    @GetMapping("/allcomment")
-    List<CommentDto> getComments() {
-        return commentService.getAll();
-    }
+//    @GetMapping("/allcomment")
+//    List<CommentDto> getComments() {
+//        return commentService.getAll();
+//    }
 }

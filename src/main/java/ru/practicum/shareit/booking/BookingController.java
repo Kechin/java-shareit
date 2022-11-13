@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
-import ru.practicum.shareit.booking.model.BookingMapper;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.ValidationException;
 
@@ -63,7 +62,7 @@ public class BookingController {
     @GetMapping("/{id}")
     BookingDto getById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable Long id) {
 
-        return BookingMapper.toBookingDto(bookingService.getById(id, userId));
+        return bookingService.getById(id, userId);
     }
 
 

@@ -35,6 +35,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final Sort sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
 
+
     @Override
     @Transactional
     public BookingDto create(BookingRequestDto bookingDto, Long bookerId) {
@@ -78,7 +79,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public Booking getById(Long id, Long userId) {
+    public BookingDto getById(Long id, Long userId) {
         getUser(userId);
         Booking booking = bookingRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Неверный Booking ID"));
@@ -86,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
                 (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId))) {
             throw new NotFoundException("Не соответствие Id User");
         }
-        return booking;
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -176,7 +177,6 @@ public class BookingServiceImpl implements BookingService {
         }
         throw new ValidationException("Неверный статус");
     }
-
 
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->

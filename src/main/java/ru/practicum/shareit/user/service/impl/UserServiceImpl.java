@@ -20,9 +20,11 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+
     @Autowired
     public UserServiceImpl(UserRepository repository) {
         this.userRepository = repository;
+
     }
 
     @Transactional
@@ -54,11 +56,6 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(getUser(userId));
     }
 
-    private User getUser(Long userId) {
-
-        return userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("неверный ID"));
-    }
 
     @Override
     public List<UserDto> getAll() {
@@ -71,6 +68,11 @@ public class UserServiceImpl implements UserService {
         getUser(userId);
         log.info("Запрос на удаления пользователя " + userId);
         userRepository.deleteById(userId);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("неверный User ID"));
     }
 
 

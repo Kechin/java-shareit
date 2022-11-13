@@ -39,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final Sort sortByDescEnd = Sort.by(Sort.Direction.DESC, "end");
 
+
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository, ItemRequestRepository itemRequestRepository,
                            UserRepository userRepository, CommentRepository commentRepository,
@@ -48,6 +49,7 @@ public class ItemServiceImpl implements ItemService {
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.bookingRepository = bookingRepository;
+
     }
 
     @Transactional
@@ -58,7 +60,9 @@ public class ItemServiceImpl implements ItemService {
         Item newItem = ItemMapper.toItem(itemDto);
         Long itemRequestId = itemDto.getRequestId();
         if (itemRequestId != null) {
-            newItem.setItemRequest(getItemRequest(itemRequestId));
+            ItemRequest itemRequest = ((itemRequestRepository.findById(itemRequestId))
+                    .orElseThrow(() -> new NotFoundException("ItemRequest c данным Id не найден")));
+            newItem.setItemRequest(itemRequest);
         }
 
         return ItemMapper.toItemDto(itemRepository.save(newItem));
@@ -127,6 +131,11 @@ public class ItemServiceImpl implements ItemService {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("неверный user ID"));
     }
 
+    private Item getItem(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("неверный Item ID"));
+    }
+
     private ItemDtoWithBooking setLastAndNextBookings(ItemDtoWithBooking itemDto) {
 
         Booking lastBooking = bookingRepository.findFirstByItemIdAndEndIsBefore(itemDto.getId(), LocalDateTime.now(), sortByDescEnd);
@@ -147,14 +156,7 @@ public class ItemServiceImpl implements ItemService {
         return itemDto;
     }
 
-    private Item getItem(Long id) {
-        return ((itemRepository.findById(id)).orElseThrow(() -> new NotFoundException("Item c данным Id не найден")));
-    }
 
-    private ItemRequest getItemRequest(Long id) {
-        return ((itemRequestRepository.findById(id))
-                .orElseThrow(() -> new NotFoundException("ItemRequest c данным Id не найден")));
 
-    }
 
 }

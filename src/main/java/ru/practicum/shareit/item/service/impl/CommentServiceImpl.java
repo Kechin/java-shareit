@@ -30,15 +30,20 @@ public class CommentServiceImpl implements CommentService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
 
+
     @Transactional
     @Override
     public CommentDto create(Long itemId, Long userId, CommentDto commentText) {
         log.info("Запрос на добавление коммента " + userId + " " + commentText);
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("неверный User ID"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("неверный Item ID"));
         bookingRepository.findBookingsByItem_IdAndBooker_Id(itemId, userId).stream()
                 .filter(v -> v.getEnd().isBefore(LocalDateTime.now()))
                 .findFirst()
                 .orElseThrow(() -> new ValidationException("Данный пользователь вещь не использовал."));
-        Comment newComment = new Comment(null, commentText.getText(), getItem(itemId), getUser(userId), LocalDateTime.now());
+        Comment newComment = new Comment(null, commentText.getText(), item, user, LocalDateTime.now());
 
         return CommentMapper.toCommentDto(commentRepository.save(newComment));
     }
@@ -48,14 +53,5 @@ public class CommentServiceImpl implements CommentService {
         return CommentMapper.toCommentDtos(commentRepository.findAll());
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("неверный User ID "));
-    }
-
-    private Item getItem(Long userId) {
-        return itemRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("неверный Item ID"));
-    }
 
 }

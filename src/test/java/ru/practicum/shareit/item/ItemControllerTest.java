@@ -11,12 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.CommentMapper;
+import ru.practicum.shareit.item.model.ItemMapper;
+import ru.practicum.shareit.item.service.impl.CommentServiceImpl;
 import ru.practicum.shareit.item.service.impl.ItemServiceImpl;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.UserMapper;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -29,7 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ItemControllerTest {
     @Mock
     private ItemServiceImpl itemService;
-
+    @Mock
+    private CommentServiceImpl commentService;
     @InjectMocks
     private ItemController controller;
     @Autowired
@@ -39,6 +47,8 @@ class ItemControllerTest {
     private UserDto userDto;
     private ItemDto itemDto;
     private ItemDtoWithBooking itemDtoWithBooking;
+    private Comment comment;
+    private CommentDto commentDto = new CommentDto();
 
     @BeforeEach
     void setUp() {
@@ -62,6 +72,10 @@ class ItemControllerTest {
                 " Ibm Pc",
                 true,
                 null, null, null, null);
+        comment = new Comment(1L, "comment", ItemMapper.toItem(itemDto),
+                UserMapper.toUser(userDto), LocalDateTime.now());
+        commentDto.setText("comment");
+
     }
 
     @Test
@@ -71,7 +85,9 @@ class ItemControllerTest {
 
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", "1")
-                        .content(mapper.writeValueAsString(itemDto)).characterEncoding(StandardCharsets.UTF_8)
+
+                        .content(mapper.writeValueAsString(itemDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -95,11 +111,7 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is("IBM")));
     }
-//    @GetMapping("/{id}")
-//    ItemDtoWithBooking getById(@PathVariable Long id, @RequestHeader("X-Sharer-User-Id") Long userId) {
-//        log.info("getByUserId" + id + " " + " " + userId);
-//        return itemService.getByOwnerIdAndUserId(id, userId);
-//    }
+
 
     @Test
     void getByText() throws Exception {
@@ -126,6 +138,55 @@ class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
 
+
+    }
+
+    @Test
+    void getAllByUserAndItemId() throws Exception {
+
+        when(itemService.getAllByUserId(any(), any(), any())).thenReturn(List.of(itemDtoWithBooking));
+
+        mvc.perform(get("/items/")
+                        .header("X-Sharer-User-Id", "1")
+                        .param("from", "0")
+                        .param("size", "1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(List.of(itemDtoWithBooking))));
+
+
+    }
+
+    @Test
+    void getById() throws Exception {
+
+        when(itemService.getByOwnerIdAndUserId(any(), any())).thenReturn((itemDtoWithBooking));
+
+        mvc.perform(get("/items/{id}", 1)
+                        .header("X-Sharer-User-Id", "1")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(itemDtoWithBooking)));
+
+
+    }
+
+    @Test
+    void createComments() throws Exception {
+
+        when(commentService.create(any(), any(), any())).thenReturn(CommentMapper.toCommentDto(comment));
+
+        mvc.perform(post("/items/{itemId}/comment", 1)
+                        .header("X-Sharer-User-Id", "1")
+                        .content(mapper.writeValueAsString((commentDto)))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
 
     }
 

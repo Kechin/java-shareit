@@ -38,6 +38,7 @@ class ItemServiceImplTest {
     CommentRepository commentRepository;
     BookingRepository bookingRepository;
 
+
     User user = new User(1L, "d", "rt@ya.ru");
     Item item = new Item(1L, "PC", "IBM PC", true, user);
 
@@ -91,7 +92,16 @@ class ItemServiceImplTest {
                 () -> itemService.update(1L, ItemMapper.toItemDto(item), 1L));
         Assertions.assertEquals("ID пользователя не соотвествует Владельцу",
                 exception.getMessage());
+        ItemDto itemDto = ItemMapper.toItemDto(item);
+        item.setOwner(user);
+        itemDto.setName(null);
+        itemDto.setDescription(null);
+        itemDto.setAvailable(null);
+        Assertions.assertEquals(itemService.update(1L, itemDto, 1L), ItemMapper.toItemDto(item));
+
+
     }
+
 
     @Test
     void getByItemId() {

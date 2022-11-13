@@ -55,6 +55,7 @@ class BookingServiceImplTest {
         item = new Item(1L, "PC", "IBM PC", true, owner);
         comment = new Comment(1L, "Cool", item, user, LocalDateTime.now());
         booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(2L), item, user, Status.WAITING);
+
     }
 
     @Test
@@ -87,30 +88,44 @@ class BookingServiceImplTest {
                 () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 1L));
         Assertions.assertEquals("Вещь была забронирована ранее",
                 exception3.getMessage());
+        item.setAvailable(true);
+        booking.setItem(item);
+        booking.setStart(LocalDateTime.now().plusDays(200));
+        ValidationException exception4 = Assertions.assertThrows(
+                ValidationException.class,
+                () -> bookingService.create(BookingMapper.bookingRequestDto(booking), 1L));
+        Assertions.assertEquals("Неверные даты",
+                exception4.getMessage());
+
+
     }
 
     @Test
     void update() {
+        NotFoundException exception5 = Assertions.assertThrows(
+                NotFoundException.class,
+                () -> bookingService.update(33L, 1L, true));
+        Assertions.assertEquals("Бронирования с указанным id не существует",
+                exception5.getMessage());
         getItem();
         getUser();
         getBooker();
+
         ValidationException exception4 = Assertions.assertThrows(
                 ValidationException.class,
                 () -> bookingService.update(1L, 2L, null));
         Assertions.assertEquals("ОШИБКА в переданном статусе бронирования WAITING",
                 exception4.getMessage());
-        NotFoundException exception = Assertions.assertThrows(
-                NotFoundException.class,
-                () -> bookingService.update(12L, 1L, true));
-        Assertions.assertEquals("Booking с указанным ID не найден",
-                exception.getMessage());
 
 
         when(bookingRepository.save(any()))
                 .thenReturn(booking);
         Assertions.assertEquals(bookingService.update(1L, 2L, false).getBooker(),
                 BookingMapper.toBookingDto(booking).getBooker());
-
+        when(bookingRepository.save(any()))
+                .thenReturn(booking);
+        Assertions.assertEquals(bookingService.update(1L, 2L, true).getBooker(),
+                BookingMapper.toBookingDto(booking).getBooker());
         NotFoundException exception2 = Assertions.assertThrows(
                 NotFoundException.class,
                 () -> bookingService.update(3L, 1L, true));
@@ -132,16 +147,17 @@ class BookingServiceImplTest {
     void getById() {
         getUser();
 
-        NotFoundException exception2 = Assertions.assertThrows(
+
+        NotFoundException exception5 = Assertions.assertThrows(
                 NotFoundException.class,
                 () -> bookingService.getById(12L, 2L));
         Assertions.assertEquals("Неверный Booking ID",
-                exception2.getMessage());
+                exception5.getMessage());
         getBooker();
 
         when(bookingRepository.findById(1L))
                 .thenReturn(Optional.of(booking));
-        Assertions.assertEquals(bookingService.getById(1L, 1L), booking);
+        Assertions.assertEquals(bookingService.getById(1L, 1L), BookingMapper.toBookingDto(booking));
         NotFoundException exception = Assertions.assertThrows(
                 NotFoundException.class,
                 () -> bookingService.getById(1L, 12L));
