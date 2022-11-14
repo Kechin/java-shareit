@@ -168,8 +168,7 @@ public class ItemServiceImpl implements ItemService {
         return itemDtos;
 
 
-//     List<ItemDtoWithBooking> itemDto = ItemMapper.itemDtoWithBookings(itemRepository.findItemsByOwnerId(userId));
-//       return itemDto.stream().map(i -> setLastAndNextBookings(i)).map(i -> setComments(i)).collect(Collectors.toList());
+
     }
 
     @Override
