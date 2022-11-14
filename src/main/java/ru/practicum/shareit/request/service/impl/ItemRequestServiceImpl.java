@@ -23,7 +23,6 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestDtos = ItemRequestMapper.itemRequestDtos(requests.toList());
 
         List<Item> items = itemRepository.findAllByItemRequestIn(requests.toList());
-        Map<Item, Long> itemMap = items.stream().collect(Collectors.toMap(x -> x, x -> x.getItemRequest().getId()));
         for (ItemRequestDto itemReg : itemRequestDtos) {
             List<Item> items1 = items.stream()
                     .filter(i -> Objects.equals(i.getItemRequest().getId(), itemReg.getId()))

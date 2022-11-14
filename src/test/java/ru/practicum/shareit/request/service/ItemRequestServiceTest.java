@@ -80,6 +80,8 @@ class ItemRequestServiceTest {
                 .thenReturn(Optional.of(itemRequest));
         Assertions.assertEquals(itemRequestService.getByRequestId(1L, 1L).getId(),
                 (itemRequest.getId()));
+
+
     }
 
     @Test
