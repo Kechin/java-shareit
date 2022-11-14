@@ -166,13 +166,7 @@ class BookingServiceImplTest {
 
     }
 
-    //    serValidation();
-//    when(itemRepository.findByOwnerId(any(), any()))
-//            .thenReturn(new PageImpl<>(Collections.singletonList(item1)));
-//    when(mapper.toInfoItemDto(any())).thenReturn(infoItemDto1);
-//        Assertions.assertEquals(new ArrayList<>(List.of(infoItemDto1)),
-//            itemService.ItemsByOwnerId(1L, PageRequest.of(0, 10)));
-//}
+
     @Test
     void getAllByBooker() {
         getUser();

@@ -89,13 +89,6 @@ class BookingRepositoryTest {
         Assertions.assertEquals(List.of(booking3.getId()), List.of(actual.get(0).getId()));
     }
 
-//    @Test
-//    void findBookingsByBookerIdAndStatusEquals() {
-//        List<Booking> actual = bookingRepository
-//                .findBookingsByBookerIdAndStatusEquals(user2.getId(), Status.APPROVED, pageable).toList();
-//        Assertions.assertEquals(List.of(booking2.getId()), List.of(actual.get(0).getId()));
-
-    //  }
 
     @Test
     void findBookingsByItem_Owner_IdAndStatusEquals() {

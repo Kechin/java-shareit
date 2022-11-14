@@ -30,13 +30,23 @@ class ItemMapperTest {
 
     @Test
     void toItem() {
+        Assertions.assertNotNull(item);
         Assertions.assertEquals(item.getId(), itemDto.getId());
+        Assertions.assertEquals(item.getName(), itemDto.getName());
+        Assertions.assertEquals(item.getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(item.getAvailable(), itemDto.getAvailable());
+        Assertions.assertEquals(UserMapper.toUserDto(item.getOwner()), itemDto.getOwner());
 
     }
 
     @Test
     void toItemDto() {
+        Assertions.assertNotNull(item);
         Assertions.assertEquals(ItemMapper.toItemDto(item).getId(), itemDto.getId());
-
+        Assertions.assertEquals(ItemMapper.toItemDto(item).getName(), itemDto.getName());
+        Assertions.assertEquals(ItemMapper.toItemDto(item).getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(ItemMapper.toItemDto(item).getAvailable(), itemDto.getAvailable());
+        Assertions.assertEquals(ItemMapper.toItemDto(item).getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(ItemMapper.toItemDto(item).getOwner(), itemDto.getOwner());
     }
 }

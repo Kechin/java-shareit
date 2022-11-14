@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.storage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
@@ -14,6 +15,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findItemsByOwnerId(Long id);
 
     List<Item> findItemsByItemRequest_Id(Long id);
+
+    List<Item> findByIdIn(List ids);
+
+    List<Item> findAllByItemRequestIn(List<ItemRequest> itemRequests);
 
 }
 

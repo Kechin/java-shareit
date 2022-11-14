@@ -19,12 +19,18 @@ class UserMapperTest {
 
     @Test
     void toUserDto() {
+        Assertions.assertNotNull(userDto);
         Assertions.assertEquals(user.getId(), userDto.getId());
+        Assertions.assertEquals(user.getName(), userDto.getName());
+        Assertions.assertEquals(user.getEmail(), userDto.getEmail());
 
     }
 
     @Test
     void toUser() {
+        Assertions.assertNotNull(user);
         Assertions.assertEquals(UserMapper.toUserDto(user).getId(), userDto.getId());
+        Assertions.assertEquals(UserMapper.toUserDto(user).getName(), userDto.getName());
+        Assertions.assertEquals(UserMapper.toUserDto(user).getEmail(), userDto.getEmail());
     }
 }

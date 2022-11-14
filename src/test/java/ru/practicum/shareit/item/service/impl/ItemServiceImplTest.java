@@ -5,9 +5,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingMapper;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.CommentMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.storage.CommentRepository;
@@ -21,6 +27,7 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +48,9 @@ class ItemServiceImplTest {
 
     User user = new User(1L, "d", "rt@ya.ru");
     Item item = new Item(1L, "PC", "IBM PC", true, user);
+    Booking booking = new Booking(1L, LocalDateTime.now().plusDays(12), LocalDateTime.now(), item, user, Status.APPROVED);
+    Booking booking2 = new Booking(1L, LocalDateTime.now().minusDays(12), LocalDateTime.now().minusDays(3), item, user, Status.APPROVED);
+    Comment comment = new Comment(1L, "text", item, user, LocalDateTime.now());
 
     @BeforeEach
     void before() {
@@ -83,6 +93,7 @@ class ItemServiceImplTest {
 
         getUser();
         getItem();
+
         when(itemRepository.save(any()))
                 .thenReturn(item);
         Assertions.assertEquals(itemService.update(1L, ItemMapper.toItemDto(item), 1L), ItemMapper.toItemDto(item));
@@ -118,10 +129,17 @@ class ItemServiceImplTest {
     @Test
     void getAllByUserId() {
         getUser();
-        when(itemRepository.findItemsByOwnerId(any()))
-                .thenReturn(new ArrayList<>(Collections.singleton(item)));
+        when(itemRepository.findItemsByOwnerId(any())).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemIn(any(), any())).thenReturn(List.of(booking, booking2));
+        when(commentRepository
+                .findAllByItemIn(any())).thenReturn(List.of(comment));
+
+        ItemDtoWithBooking itemDtoWithBooking = ItemMapper.itemDtoWithBooking(item);
+        itemDtoWithBooking.setLastBooking(BookingMapper.bookingShortDto(booking));
+        itemDtoWithBooking.setNextBooking(BookingMapper.bookingShortDto(booking2));
+        itemDtoWithBooking.setComments((CommentMapper.toCommentDtos(List.of(comment))));
         Assertions.assertEquals(itemService.getAllByUserId(1L, 0, 2),
-                new ArrayList<>(Collections.singleton(ItemMapper.itemDtoWithBooking(item))));
+                List.of(itemDtoWithBooking));
     }
 
     @Test

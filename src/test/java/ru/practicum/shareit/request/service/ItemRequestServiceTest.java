@@ -51,13 +51,14 @@ class ItemRequestServiceTest {
         itemRequestRepository = mock(ItemRequestRepository.class);
         commentRepository = mock(CommentRepository.class);
         bookingRepository = mock(BookingRepository.class);
-        itemRequestService = new ItemRequestServiceImpl(itemRequestRepository, itemRepository, userRepository);
+        itemRequestService =
+                new ItemRequestServiceImpl(itemRequestRepository, itemRepository, userRepository, bookingRepository);
         user = new User(1L, "Sergei", "we@ddf.dd");
         owner = new User(2L, "Owner", "re@df.dd");
-        item = new Item(1L, "PC", "IBM PC", true, user);
         comment = new Comment(1L, "Cool", item, user, LocalDateTime.now());
         booking = new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1L), item, user, Status.APPROVED);
         itemRequest = new ItemRequest(1L, "REQUEST", LocalDateTime.now(), user);
+        item = new Item(1L, "PC", "IBM PC", true, user, itemRequest);
 
     }
 
@@ -92,9 +93,13 @@ class ItemRequestServiceTest {
 
     @Test
     void getAllForRequester() {
+
+
         getUser();
         when(itemRequestRepository.findAllByRequesterId(any()))
                 .thenReturn(Collections.singletonList(itemRequest));
+
+        when(itemRepository.findAllByItemRequestIn(any())).thenReturn(Collections.singletonList(item));
         Assertions.assertEquals(new ArrayList<>(List.of(ItemRequestMapper.itemRequestDto(itemRequest))).get(0).getId(),
                 (itemRequestService.getAllForRequester(1L)).get(0).getId());
     }

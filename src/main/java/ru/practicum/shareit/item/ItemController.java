@@ -13,7 +13,7 @@ import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
+import javax.validation.constraints.Min;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +24,7 @@ import java.util.List;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -49,20 +50,17 @@ public class ItemController {
 
     @GetMapping
     List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                   @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(defaultValue = "10") Integer size) {
-        if (from < 0 || size < 1) {
-            throw new ValidationException("Параметры заданы from и size неверно");
-        }
+                                                   @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                   @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+
         return itemService.getAllByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    List<ItemDto> getByText(@RequestParam String text, @RequestParam(defaultValue = "0") Integer from,
-                            @RequestParam(defaultValue = "10") Integer size) {
-        if (from < 0 || size < 1) {
-            throw new ValidationException("Параметры заданы from и size неверно");
-        }
+    List<ItemDto> getByText(@RequestParam String text,
+                            @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                            @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+
         if (text.isBlank()) {
             return Collections.emptyList();
         }
@@ -78,8 +76,4 @@ public class ItemController {
         return commentService.create(itemId, userId, comment);
     }
 
-//    @GetMapping("/allcomment")
-//    List<CommentDto> getComments() {
-//        return commentService.getAll();
-//    }
 }
