@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import java.util.Objects;
-import java.util.Map;
 
 import java.util.Objects;
 
@@ -72,10 +71,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         for (ItemRequestDto itemReg : itemRequestDtos) {
             List<Item> items1 = items.stream()
-                    .filter(i -> Objects.equals(i.getItemRequest().getId(), itemReg.getId()))
-
-        
-                    .collect(Collectors.toList());
+                    .filter(i -> Objects.equals(i.getItemRequest().getId(), itemReg.getId())).collect(Collectors.toList());
             if (items1 == null) {
                 items1 = Collections.emptyList();
             }
