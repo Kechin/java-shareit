@@ -36,14 +36,19 @@ class BookingMapperTest {
 
     @Test
     void toBookingDto() {
+        Assertions.assertNotNull(booking);
         Assertions.assertEquals(booking.getItem().getId(), bookingDto.getItem().getId());
+        Assertions.assertEquals(booking.getBooker().getId(), bookingDto.getBooker().getId());
+        Assertions.assertEquals(booking.getEnd(), bookingDto.getEnd());
+        Assertions.assertEquals(booking.getStart(), bookingDto.getStart());
+        Assertions.assertEquals(booking.getStatus(), bookingDto.getStatus());
 
     }
 
     @Test
     void bookingShortDto() {
         Assertions.assertEquals(booking.getBooker().getId(), bookingShortDto.getBookerId());
-
+        Assertions.assertEquals(booking.getBooker().getId(), bookingShortDto.getBookerId());
     }
 
 }

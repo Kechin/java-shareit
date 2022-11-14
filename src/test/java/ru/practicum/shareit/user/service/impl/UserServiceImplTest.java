@@ -16,8 +16,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 class UserServiceImplTest {
@@ -54,9 +53,9 @@ class UserServiceImplTest {
 
     @Test
     void delete() {
-        getUser();
-        userService.delete(1L);
-
+        when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
+        userService.delete(user.getId());
+        verify(userRepository, times(0)).delete(any());
     }
 
     @Test

@@ -40,10 +40,10 @@ public class UserServiceImpl implements UserService {
     public UserDto update(UserDto userDto, Long id) {
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
         User oldUser = getUser(id);
-        if (userDto.getEmail() != null) {
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
             oldUser.setEmail(userDto.getEmail());
         }
-        if (userDto.getName() != null) {
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
             oldUser.setName(userDto.getName());
         }
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);

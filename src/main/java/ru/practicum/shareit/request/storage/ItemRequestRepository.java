@@ -12,6 +12,7 @@ import java.util.List;
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findAllByIdBetween(Long first, Long last);
 
+
     List<ItemRequest> findAllByRequesterId(Long requesterId);
 
     ItemRequest findItemRequestByIdAndRequester_Id(Long requestId, Long requesterId);

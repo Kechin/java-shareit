@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
@@ -22,6 +23,7 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +34,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+
 
     @Transactional
     @Override
@@ -53,26 +57,44 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getAll(Long userId, Integer from, Integer size) {
+
         Pageable pageable = PageRequest.of(from, size);
-        Page<ItemRequest> itemRequestsPage = itemRequestRepository.findAllByRequesterIdIsNotLike(userId, pageable);
-        List<ItemRequestDto> itemRequestDtos = ItemRequestMapper.itemRequestDtos(itemRequestsPage.toList());
-        return itemRequestDtos.stream().map(this::setItems).collect(Collectors.toList());
+
+        Page<ItemRequest> requests = itemRequestRepository.findAllByRequesterIdIsNotLike(userId, pageable);
+        List<ItemRequestDto> itemRequestDtos = ItemRequestMapper.itemRequestDtos(requests.toList());
+
+        List<Item> items = itemRepository.findAllByItemRequestIn(requests.toList());
+        Map<Item, Long> itemMap = items.stream().collect(Collectors.toMap(x -> x, x -> x.getItemRequest().getId()));
+        for (ItemRequestDto itemReg : itemRequestDtos) {
+            List<Item> items1 = items.stream()
+                    .filter(i -> i.getItemRequest().getId() == itemReg.getId())
+                    .collect(Collectors.toList());
+            if (items1 == null) {
+                items1 = Collections.emptyList();
+            }
+            itemReg.setItems(ItemMapper.itemDtoWithBookings(items1));
+        }
+        return itemRequestDtos;
+
     }
 
     @Override
     public List<ItemRequestDto> getAllForRequester(Long requesterId) {
         getUser(requesterId);
-        log.info("Попытка получить все реквесты пользователя.");
         List<ItemRequest> requests = itemRequestRepository.findAllByRequesterId(requesterId);
-        if (requests == null) {
-            return Collections.emptyList();
-        }
-        List<ItemRequestDto> itemRequestDto = ItemRequestMapper
-                .itemRequestDtos(itemRequestRepository
-                        .findAllByRequesterId(requesterId))
-                .stream().map(this::setItems).collect(Collectors.toList());
+        List<ItemRequestDto> itemRequestDtos = ItemRequestMapper.itemRequestDtos(requests);
 
-        return itemRequestDto;
+        List<Item> items = itemRepository.findAllByItemRequestIn(requests);
+        for (ItemRequestDto itemReg : itemRequestDtos) {
+            List<Item> items1 = items.stream()
+                    .filter(i -> i.getItemRequest().getId() == itemReg.getId())
+                    .collect(Collectors.toList());
+            if (items1 == null) {
+                items1 = Collections.emptyList();
+            }
+            itemReg.setItems(ItemMapper.itemDtoWithBookings(items1));
+        }
+        return itemRequestDtos;
     }
 
     private User getUser(Long userId) {

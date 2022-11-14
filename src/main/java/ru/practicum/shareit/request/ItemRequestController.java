@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequestMapping(path = "/requests")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
@@ -36,7 +38,7 @@ public class ItemRequestController {
     List<ItemRequestDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                 @RequestParam(required = false) Integer from,
                                 @RequestParam(required = false) Integer size) {
-        if (from == null || size == null) {
+        if (from == null || size == null) { // Оставил т.к. нужно возвращать пустой список
             return Collections.emptyList();
         }
         if (from < 0 || size < 1) {

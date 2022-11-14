@@ -26,7 +26,10 @@ class CommentMapperTest {
 
     @Test
     void toCommentDto() {
+        Assertions.assertNotNull(comment);
         Assertions.assertEquals(comment.getAuthor().getName(), commentDto.getAuthorName());
+        Assertions.assertEquals(comment.getText(), commentDto.getText());
+        Assertions.assertEquals(comment.getCreated(), commentDto.getCreated());
 
     }
 }
