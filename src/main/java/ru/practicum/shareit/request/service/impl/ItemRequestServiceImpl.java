@@ -23,7 +23,12 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+
 import java.util.Objects;
+import java.util.Map;
+
+import java.util.Objects;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -64,9 +69,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestDtos = ItemRequestMapper.itemRequestDtos(requests.toList());
 
         List<Item> items = itemRepository.findAllByItemRequestIn(requests.toList());
+
         for (ItemRequestDto itemReg : itemRequestDtos) {
             List<Item> items1 = items.stream()
                     .filter(i -> Objects.equals(i.getItemRequest().getId(), itemReg.getId()))
+
+        
                     .collect(Collectors.toList());
             if (items1 == null) {
                 items1 = Collections.emptyList();
@@ -86,7 +94,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<Item> items = itemRepository.findAllByItemRequestIn(requests);
         for (ItemRequestDto itemReg : itemRequestDtos) {
             List<Item> items1 = items.stream()
+
                     .filter(i -> Objects.equals(i.getItemRequest().getId(), itemReg.getId()))
+
                     .collect(Collectors.toList());
             if (items1 == null) {
                 items1 = Collections.emptyList();
