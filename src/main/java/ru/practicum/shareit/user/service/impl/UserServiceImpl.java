@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,14 +15,22 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+
+    @Autowired
+    public UserServiceImpl(UserRepository repository) {
+        this.userRepository = repository;
+
+    }
+
     @Transactional
     @Override
     public UserDto create(UserDto userDto) {
+        log.info("Запрос на добавления нового пользователя" + userDto);
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
@@ -35,7 +43,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() != null) {
             oldUser.setEmail(userDto.getEmail());
         }
-        if (userDto.getName() != null) {
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
             oldUser.setName(userDto.getName());
         }
         log.info("Запрос на обновления данных пользователя " + id + " " + userDto);
@@ -48,11 +56,6 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(getUser(userId));
     }
 
-    private User getUser(Long userId) {
-
-        return userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("неверный ID"));
-    }
 
     @Override
     public List<UserDto> getAll() {
@@ -65,6 +68,11 @@ public class UserServiceImpl implements UserService {
         getUser(userId);
         log.info("Запрос на удаления пользователя " + userId);
         userRepository.deleteById(userId);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("неверный User ID"));
     }
 
 

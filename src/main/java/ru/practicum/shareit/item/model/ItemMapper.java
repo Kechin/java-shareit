@@ -16,17 +16,25 @@ public class ItemMapper {
     public static Item toItem(ItemDto itemDto) {
 
         return new Item(itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getAvailable(),
-                UserMapper.toUser(itemDto.getOwner()));
+                UserMapper.toUser(itemDto.getOwner()), null);
     }
 
     public static ItemDto toItemDto(Item item) {
+        Long requestId = null;
+        if (item.getItemRequest() != null) {
+            requestId = item.getItemRequest().getId();
+        }
         return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
-                UserMapper.toUserDto(item.getOwner()), null);
+                UserMapper.toUserDto(item.getOwner()), null, requestId);
     }
 
     public static ItemDtoWithBooking itemDtoWithBooking(Item item) {
+        Long requestId = null;
+        if (item.getItemRequest() != null) {
+            requestId = item.getItemRequest().getId();
+        }
         return new ItemDtoWithBooking(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
-                null, null, new ArrayList<>());
+                null, null, new ArrayList<>(), requestId);
     }
 
     public static List<ItemDtoWithBooking> itemDtoWithBookings(List<Item> items) {

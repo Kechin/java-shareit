@@ -1,10 +1,13 @@
 package ru.practicum.shareit.booking.storage;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    List<Booking> findAllByItemIn(List<Item> items, Sort sort);
 
     Booking findFirstByItemIdAndEndIsBefore(Long itemId, LocalDateTime data, Sort sort);
 
@@ -21,41 +25,40 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingsByItem_IdAndBooker_Id(Long itemId, Long bookerId);
 
     //All
-    List<Booking> findBookingsByItem_Owner_IdOrderByStartDesc(Long ownerId);
+    Page<Booking> findBookingsByItem_Owner_IdOrderByStartDesc(Long ownerId, Pageable pageable);
 
     //Past
-    List<Booking> findBookingsByItem_Owner_IdAndEndIsBefore(Long ownerId, LocalDateTime date, Sort sort);
+    Page<Booking> findBookingsByItem_Owner_IdAndEndIsBefore(Long ownerId, LocalDateTime date, Pageable pageable);
 
     //Future
-    List<Booking> findBookingsByItem_Owner_IdAndStartIsAfter(Long ownerId, LocalDateTime date, Sort sort);
+    Page<Booking> findBookingsByItem_Owner_IdAndStartIsAfter(Long ownerId, LocalDateTime date, Pageable pageable);
 
     //Current
-    List<Booking>
+    Page<Booking>
     findBookingsByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(Long ownerId, LocalDateTime date1,
-                                                             LocalDateTime date2, Sort sort);
+                                                             LocalDateTime date2, Pageable pageable);
 
     //Waiting
     //Rejected
-    List<Booking> findBookingsByItem_Owner_IdAndStatusEquals(Long ownerId, Status status, Sort sort);
-
+    Page<Booking> findBookingsByItem_Owner_IdAndStatusEquals(Long ownerId, Status status, Pageable pageable);
 
     //ByBooker
     //All
-    List<Booking> findBookingsByBookerIdOrderByStartDesc(Long bookerId);
+    Page<Booking> findBookingsByBookerIdOrderByStartDesc(Long bookerId, Pageable pageable);
 
     //Past
-    List<Booking> findBookingsByBookerIdAndEndIsBefore(Long bookerId, LocalDateTime date, Sort sort);
+    Page<Booking> findBookingsByBookerIdAndEndIsBefore(Long bookerId, LocalDateTime date, Pageable pageable);
 
     //Future
-    List<Booking> findBookingsByBookerIdAndStartIsAfter(Long bookerId, LocalDateTime date, Sort sort);
+    Page<Booking> findBookingsByBookerIdAndStartIsAfter(Long bookerId, LocalDateTime date, Pageable pageable);
 
     //Current
-    List<Booking> findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(Long bookerId, LocalDateTime date1,
-                                                                      LocalDateTime date2, Sort sort);
+    Page<Booking> findBookingsByBookerIdAndStartIsBeforeAndEndIsAfter(Long bookerId, LocalDateTime date1,
+                                                                      LocalDateTime date2, Pageable pageable);
 
     //Waiting
     //Rejected
-    List<Booking> findBookingsByBookerIdAndStatusEquals(Long bookerId, Status status, Sort sort);
+    Page<Booking> findBookingsByBookerIdAndStatusEquals(Long bookerId, Status status, Pageable pageable);
 
 
 }

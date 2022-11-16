@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import java.util.List;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -47,18 +49,23 @@ public class ItemController {
     }
 
     @GetMapping
-    List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("getAllByUserId");
-        return itemService.getAllByUserId(userId);
+    List<ItemDtoWithBooking> getAllByUserAndItemId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                   @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                                                   @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+
+        return itemService.getAllByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    List<ItemDto> getByText(@RequestParam String text) {
+    List<ItemDto> getByText(@RequestParam String text,
+                            @RequestParam(defaultValue = "0") @Min(0) Integer from,
+                            @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+
         if (text.isBlank()) {
             return Collections.emptyList();
         }
 
-        return itemService.getByText(text);
+        return itemService.getByText(text, from, size);
     }
 
 
@@ -69,8 +76,4 @@ public class ItemController {
         return commentService.create(itemId, userId, comment);
     }
 
-    @GetMapping("/allcomment")
-    List<CommentDto> getComments() {
-        return commentService.getAll();
-    }
 }

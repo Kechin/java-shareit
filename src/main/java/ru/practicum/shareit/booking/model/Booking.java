@@ -36,4 +36,5 @@ public class Booking {
     @Column(name = "status", nullable = false, length = 64)
     private Status status;
 
+
 }
