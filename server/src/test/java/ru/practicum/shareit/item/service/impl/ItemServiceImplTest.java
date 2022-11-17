@@ -6,11 +6,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingMapper;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.CommentMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.item.storage.CommentRepository;
@@ -24,6 +27,7 @@ import ru.practicum.shareit.user.storage.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -122,6 +126,21 @@ class ItemServiceImplTest {
                 exception.getMessage());
     }
 
+    @Test
+    void getAllByUserId() {
+        getUser();
+        when(itemRepository.findItemsByOwnerIdOrderById(any())).thenReturn(List.of(item));
+        when(bookingRepository.findAllByItemIn(any(), any())).thenReturn(List.of(booking, booking2));
+        when(commentRepository
+                .findAllByItemIn(any())).thenReturn(List.of(comment));
+
+        ItemDtoWithBooking itemDtoWithBooking = ItemMapper.itemDtoWithBooking(item);
+        itemDtoWithBooking.setLastBooking(BookingMapper.bookingShortDto(booking));
+        itemDtoWithBooking.setNextBooking(BookingMapper.bookingShortDto(booking2));
+        itemDtoWithBooking.setComments((CommentMapper.toCommentDtos(List.of(comment))));
+        Assertions.assertEquals(itemService.getAllByUserId(1L, 0, 2),
+                List.of(itemDtoWithBooking));
+    }
 
     @Test
     void getByText() {
