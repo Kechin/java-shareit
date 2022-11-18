@@ -2,14 +2,12 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import java.util.List;
 
 
@@ -17,7 +15,6 @@ import java.util.List;
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class BookingController {
 
     private final BookingService bookingService;
@@ -39,18 +36,18 @@ public class BookingController {
 
     @GetMapping
     List<BookingDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @RequestParam(defaultValue = "ALL") String state,
-                            @RequestParam(defaultValue = "0") @Min(0) Integer from,
-                            @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+                            @RequestParam String state,
+                            @RequestParam Integer from,
+                            @RequestParam Integer size) {
 
         return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                   @RequestParam(defaultValue = "ALL") String state,
-                                   @RequestParam(defaultValue = "0") @Min(0) Integer from,
-                                   @RequestParam(defaultValue = "10") @Min(1) Integer size) {
+                                   @RequestParam String state,
+                                   @RequestParam Integer from,
+                                   @RequestParam Integer size) {
 
         return bookingService.getAllByOwner(userId, state, from, size);
     }
@@ -60,7 +57,6 @@ public class BookingController {
 
         return bookingService.getById(id, userId);
     }
-
 
 
 }

@@ -118,15 +118,6 @@ class ItemControllerTest {
 
         when(itemService.getByText(any(), any(), any())).thenReturn(List.of(itemDto));
 
-        mvc.perform(get("/items/search")
-                        .param("text", "")
-                        .param("from", "0")
-                        .param("size", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
 
         mvc.perform(get("/items/search")
                         .param("text", "PC")

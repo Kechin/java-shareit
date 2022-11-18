@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class ItemDtoWithBooking {
     private Long id;
 

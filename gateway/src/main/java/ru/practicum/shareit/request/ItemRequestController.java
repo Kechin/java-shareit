@@ -6,9 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Collections;
 
 
@@ -22,10 +23,8 @@ public class ItemRequestController {
 
     @PostMapping
     ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                  @RequestBody ItemRequestDto itemRequestDto) {
-        if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isBlank()) {
-            throw new ValidationException("Нельзя создать запрос без описания.");
-        }
+                                  @Valid @RequestBody ItemRequestDto itemRequestDto) {
+
         return requestClient.createItemRequest(itemRequestDto, userId);
     }
 
@@ -36,13 +35,11 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     ResponseEntity<Object> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                  @RequestParam(required = false) Integer from,
-                                  @RequestParam(required = false) Integer size) {
-        if (from == null || size == null) { // Оставил т.к. нужно возвращать пустой список
+                                  @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
+                                  @RequestParam(required = false, defaultValue = "10") @Min(1) Integer size) {
+        if (from == null || size == null) {
+            // Оставил т.к. нужно возвращать пустой список
             return ResponseEntity.ok().body(Collections.emptyList());
-        }
-        if (from < 0 || size < 1) {
-            throw new ValidationException("Параметры заданы from и size неверно");
         }
         return requestClient.getAll(userId, from, size);
     }

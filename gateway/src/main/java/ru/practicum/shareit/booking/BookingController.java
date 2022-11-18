@@ -26,6 +26,7 @@ public class BookingController {
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                               @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                               @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("{\"error\"" + ":" + "\"Unknown state: " + stateParam + "\"}"));
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
@@ -35,7 +36,9 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestBody @Valid BookItemRequestDto requestDto) {
-        log.info("Creating booking {}, userId={}", requestDto, userId);
+        if (requestDto.getStart().isEqual(requestDto.getEnd()) ||
+                requestDto.getStart().isAfter(requestDto.getEnd()))
+            log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.bookItem(userId, requestDto);
     }
 

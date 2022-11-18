@@ -65,13 +65,6 @@ class ItemRequestControllerTest {
         itemRequestDto.setDescription("");
         when(itemRequestService.create(itemRequestDto, 1L))
                 .thenReturn(itemRequestDto);
-        mvc.perform(post("/requests/", 1)
-                        .content(objectMapper.writeValueAsString(itemRequestDto))
-                        .header("X-Sharer-User-Id", "1")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
 
 
     }
@@ -92,16 +85,6 @@ class ItemRequestControllerTest {
 
     @Test
     void getAll() throws Exception {
-
-
-        mvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", "1")
-                        .param("from", "0")
-                        .param("size", "-10")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
 
 
         mvc.perform(get("/requests/all")
